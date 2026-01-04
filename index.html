@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome - School LMS</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <script src="theme.js"></script>
+    <script>
+        // Auto-redirect removed to allow landing page view
+    </script>
+</head>
+
+<body>
+    <div class="background-animation"></div>
+    <div class="container">
+        <div class="hero-section">
+            <header>
+                <h1>Welcome to Rehankhan Acadmy</h1>
+                <p>Your Gateway to Infinite Learning</p>
+            </header>
+
+            <main class="glass-panel">
+                <div class="button-group">
+                    <button id="signupBtn" class="btn primary">
+                        <span class="btn-text">Sign Up</span>
+                        <div class="btn-shine"></div>
+                    </button>
+                    <button id="loginBtn" class="btn secondary">
+                        <span class="btn-text">Log In</span>
+                    </button>
+                    <button id="settingsBtn" class="btn tertiary">
+                        <span class="icon">⚙️</span>
+                        <span class="btn-text">Settings</span>
+                    </button>
+                    <button id="themeBtn" class="btn tertiary">
+                        <span class="icon">🎨</span>
+                        <span class="btn-text">Change Mode</span>
+                    </button>
+                </div>
+            </main>
+        </div>
+
+        <section class="section stats-section">
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <span class="stat-number">10k+</span>
+                    <span class="stat-label">Active Students</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">500+</span>
+                    <span class="stat-label">Expert Courses</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">98%</span>
+                    <span class="stat-label">Success Rate</span>
+                </div>
+            </div>
+        </section>
+
+        <section class="section features-section">
+            <h2 class="section-title">Why Choose EduSphere?</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <span class="feature-icon">🚀</span>
+                    <h3>Smart Quizzes</h3>
+                    <p>Adaptive MCQ quizzes designed to challenge your understanding and improve retention.</p>
+                </div>
+                <div class="feature-card">
+                    <span class="feature-icon">📊</span>
+                    <h3>Real-time Analytics</h3>
+                    <p>Track your progress with detailed performance insights and descriptive test feedback.</p>
+                </div>
+                <div class="feature-card">
+                    <span class="feature-icon">🛡️</span>
+                    <h3>Secure Learning</h3>
+                    <p>A safe, controlled environment for students and administrators to manage educational goals.</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="section about-section">
+            <h2 class="section-title">About Our Mission</h2>
+            <div class="about-content">
+                <p>
+                    EduSphere is dedicated to revolutionizing the way schools manage learning.
+                    Our mission is to provide an intuitive, powerful, and accessible platform that
+                    bridges the gap between students and educators through technology.
+                </p>
+            </div>
+        </section>
+
+        <footer>
+            <p>&copy; 2025 EduSphere LMS. All rights reserved.</p>
+        </footer>
+    </div>
+
+    <!-- Sign Up Modal -->
+    <div id="signupModal" class="modal">
+        <div class="modal-content">
+            <span class="close" data-modal="signupModal">&times;</span>
+            <h2>Create Account</h2>
+            <form id="signupForm">
+                <div class="form-group">
+                    <label for="signup-name">Full Name</label>
+                    <input type="text" id="signup-name" name="name" required>
+                </div>
+                <div class="form-group">
+                    <label for="signup-father-name">Father's Name</label>
+                    <input type="text" id="signup-father-name" name="fatherName" required>
+                </div>
+                <div class="form-group">
+                    <label for="signup-email">Email Address</label>
+                    <input type="email" id="signup-email" name="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="signup-roll">Roll Number</label>
+                    <input type="text" id="signup-roll" name="rollNumber" required>
+                </div>
+                <button type="submit" class="btn primary">
+                    <span class="btn-text">Sign Up</span>
+                    <div class="btn-shine"></div>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Login Modal -->
+    <div id="loginModal" class="modal">
+        <div class="modal-content">
+            <span class="close" data-modal="loginModal">&times;</span>
+            <h2>Welcome Back</h2>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="login-email">Email Address</label>
+                    <input type="email" id="login-email" name="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="login-roll">Roll Number</label>
+                    <input type="text" id="login-roll" name="rollNumber" required>
+                </div>
+                <div class="form-group">
+                    <label for="login-name">Full Name</label>
+                    <input type="text" id="login-name" name="name" required>
+                </div>
+                <button type="submit" class="btn primary">
+                    <span class="btn-text">Log In</span>
+                    <div class="btn-shine"></div>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settingsModal" class="modal">
+        <div class="modal-content">
+            <span class="close" data-modal="settingsModal">&times;</span>
+            <h2>Settings Access</h2>
+            <form id="settingsForm">
+                <div class="form-group">
+                    <label for="settings-password">Enter Password</label>
+                    <input type="password" id="settings-password" name="password" placeholder="Enter admin password"
+                        required>
+                </div>
+                <button type="submit" class="btn primary">
+                    <span class="btn-text">Access</span>
+                    <div class="btn-shine"></div>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Theme Modal -->
+    <div id="themeModal" class="modal">
+        <div class="modal-content">
+            <span class="close" data-modal="themeModal">&times;</span>
+            <h2>Select Interface Mode</h2>
+            <div id="themeGrid" class="theme-grid"
+                style="display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 1rem; margin-top: 1.5rem;">
+                <!-- Generated by JS -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Theme Modal Logic
+        const themeBtn = document.getElementById('themeBtn');
+        const themeModal = document.getElementById('themeModal');
+        const themeGrid = document.getElementById('themeGrid');
+
+        themeBtn.addEventListener('click', () => {
+            themeModal.style.display = 'flex';
+            renderThemeGrid();
+        });
+
+        function renderThemeGrid() {
+            themeGrid.innerHTML = Object.keys(themes).map(key => {
+                const t = themes[key];
+                const isSelected = localStorage.getItem('selectedTheme') === key ? 'border: 2px solid white;' : 'border: 1px solid rgba(255,255,255,0.2);';
+                // Convert camelCase or key to Title Case
+                const name = key.charAt(0).toUpperCase() + key.slice(1);
+
+                return `
+            <div onclick="applyTheme('${key}'); renderThemeGrid();" style="
+                cursor: pointer; 
+                background: ${t['--bg-dark']}; 
+                padding: 1rem; 
+                border-radius: 12px; 
+                text-align: center;
+                ${isSelected}
+                transition: transform 0.2s;
+            " onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+                <div style="
+                    width: 100%; 
+                    height: 40px; 
+                    background: linear-gradient(135deg, ${t['--primary-color']}, ${t['--primary-hover']}); 
+                    border-radius: 8px; 
+                    margin-bottom: 0.5rem;
+                    box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+                "></div>
+                <span style="color: ${t['--text-light']}; font-size: 0.9rem; font-weight: 500;">${name}</span>
+            </div>
+        `;
+            }).join('');
+        }
+    </script>
+
+    <script src="script.js"></script>
+</body>
+
+</html>

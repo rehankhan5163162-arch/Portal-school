@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Dashboard - EduSphere</title>
+    <link rel="stylesheet" href="dashboard.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <script src="theme.js"></script>
+</head>
+
+<body>
+    <div class="dashboard-container">
+        <!-- Side Menu -->
+        <aside class="sidebar">
+            <div class="logo">
+                <h2>EduSphere</h2>
+                <div class="sidebar-header">
+                    <p class="student-name" id="studentName">Student Portal</p>
+                    <button id="closeSidebar" class="mobile-only-btn">✕</button>
+                </div>
+            </div>
+            <nav class="menu">
+                <a href="#" class="menu-item active" data-section="dashboard">
+                    <span class="icon">📊</span>
+                    <span>Dashboard</span>
+                </a>
+                <a href="#" class="menu-item" data-section="announcements">
+                    <span class="icon">📢</span>
+                    <span>Announcements</span>
+                </a>
+                <a href="#" class="menu-item" data-section="assignments">
+                    <span class="icon">📝</span>
+                    <span>Assignments</span>
+                </a>
+                <a href="#" class="menu-item" data-section="quiz">
+                    <span class="icon">❓</span>
+                    <span>Quiz</span>
+                </a>
+                <a href="#" class="menu-item" data-section="test">
+                    <span class="icon">📋</span>
+                    <span>Test</span>
+                </a>
+                <a href="#" class="menu-item" data-section="syllabus">
+                    <span class="icon">📚</span>
+                    <span>Syllabus</span>
+                </a>
+                <a href="#" class="menu-item" data-section="attendance">
+                    <span class="icon">✅</span>
+                    <span>Attendance</span>
+                </a>
+                <a href="#" class="menu-item logout" id="logoutBtn">
+                    <span class="icon">🚪</span>
+                    <span>Logout</span>
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="top-bar">
+                <button id="menuBtn" class="mobile-only-btn">☰</button>
+                <h1 id="pageTitle">Dashboard</h1>
+                <div class="user-info">
+                    <span id="userEmail">student@edusphere.com</span>
+                </div>
+            </header>
+
+            <!-- Dashboard Section -->
+            <section id="dashboard" class="content-section active">
+                <div class="welcome-card">
+                    <h2>Welcome Back, <span id="welcomeName">Student</span>!</h2>
+                    <p>Here's what's happening with your learning today.</p>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon">📝</div>
+                        <div class="stat-info">
+                            <h3>0</h3>
+                            <p>Pending Assignments</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">❓</div>
+                        <div class="stat-info">
+                            <h3>0</h3>
+                            <p>Upcoming Quizzes</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">📋</div>
+                        <div class="stat-info">
+                            <h3>0</h3>
+                            <p>Tests This Week</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Announcements Section -->
+            <section id="announcements" class="content-section">
+                <h2>Announcements</h2>
+                <div class="announcements-list" id="announcementsList">
+                    <!-- Announcements will be loaded dynamically -->
+                </div>
+            </section>
+
+            <!-- Assignments Section -->
+            <section id="assignments" class="content-section">
+                <h2>Your Assignments</h2>
+                <div class="assignments-list" id="assignmentsList">
+                    <!-- Assignments will be loaded dynamically -->
+                </div>
+            </section>
+
+            <!-- Quiz Section -->
+            <section id="quiz" class="content-section">
+                <h2>Available Quizzes</h2>
+                <div class="quiz-list" id="quizList">
+                    <!-- Quizzes will be loaded dynamically -->
+                </div>
+            </section>
+
+            <!-- Test Section -->
+            <section id="test" class="content-section">
+                <h2>Scheduled Tests</h2>
+                <div class="test-list" id="testList">
+                    <!-- Tests will be loaded dynamically -->
+                </div>
+            </section>
+
+            <!-- Syllabus Section -->
+            <section id="syllabus" class="content-section">
+                <h2>Course Syllabus</h2>
+                <div class="syllabus-list" id="syllabusList">
+                    <!-- Syllabus will be loaded dynamically -->
+                </div>
+            </section>
+
+            <!-- Attendance Section -->
+            <section id="attendance" class="content-section">
+                <h2>My Attendance</h2>
+                <div class="attendance-list" id="attendanceList">
+                    <!-- Attendance will be loaded dynamically -->
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Quiz Modal -->
+    <div id="quizModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="quizModalTitle">Quiz Title</h2>
+                <div class="timer" id="quizTimer">Time Left: 00:00</div>
+            </div>
+            <div class="modal-body" id="quizQuestions">
+                <!-- Questions will be injected here -->
+            </div>
+            <div class="modal-footer">
+                <button class="btn-submit" id="submitQuizBtn">Submit Quiz</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Test Modal -->
+    <div id="testModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="testModalTitle">Test Title</h2>
+                <div class="timer" id="testTimer">Time Left: 00:00</div>
+            </div>
+            <div class="modal-body">
+                <div id="testQuestionContainer">
+                    <h3 id="testQuestionNumber">Question 1</h3>
+                    <p id="testQuestionText" style="font-size: 1.1rem; margin-bottom: 1rem; color: #f8fafc;">Question
+                        text goes here...</p>
+                    <textarea id="testAnswerInput" rows="6" placeholder="Type your answer here..."
+                        style="width: 100%; padding: 1rem; border: 1px solid #e2e8f0; border-radius: 8px; font-family: inherit; resize: vertical;"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer" style="justify-content: space-between;">
+                <p style="font-size: 0.9rem; color: #64748b;">Question <span id="currentQuestionNum">1</span> of <span
+                        id="totalTestQuestions">1</span></p>
+                <div>
+                    <button class="btn-secondary" id="nextTestQuestionBtn" style="display: none;">Next</button>
+                    <button class="btn-submit" id="submitTestBtn" style="display: none;">Submit Test</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Assignment Submission Modal -->
+    <div id="assignmentModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="assignmentModalTitle">Assignment Submission</h2>
+                <button class="btn-secondary" id="closeAssignmentModal">Close</button>
+            </div>
+            <div class="modal-body">
+                <div class="assignment-details"
+                    style="margin-bottom: 2rem; padding: 1rem; background: #f8fafc; border-radius: 8px;">
+                    <h3 id="amTitle" style="margin-bottom: 0.5rem;">Title</h3>
+                    <p id="amDescription" style="color: #475569; margin-bottom: 1rem;">Description...</p>
+                    <p style="font-weight: 600;">Total Marks: <span id="amMarks">10</span></p>
+                </div>
+
+                <div id="uploadSection" class="upload-section">
+                    <div class="form-group">
+                        <label>Upload File (Max 500KB - Word, Excel, PDF, Images)</label>
+                        <input type="file" id="assignmentFile" accept=".doc,.docx,.xls,.xlsx,.pdf,.jpg,.png,.txt"
+                            required>
+                        <p class="help-text" style="color: #94a3b8; font-size: 0.85rem; margin-top: 5px;">File must be
+                            less than 500KB.</p>
+                    </div>
+                    <button class="btn-primary" onclick="submitAssignment()">Submit Assignment</button>
+                    <p id="uploadError" style="color: #ef4444; margin-top: 10px; display: none;"></p>
+                </div>
+
+                <div id="submissionStatus" style="display: none; text-align: center; padding: 2rem;">
+                    <div class="status-icon" style="font-size: 3rem; margin-bottom: 1rem;">✅</div>
+                    <h3>Submitted Successfully!</h3>
+                    <p>Your assignment has been submitted for grading.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="dashboard.js"></script>
+</body>
+
+</html>
