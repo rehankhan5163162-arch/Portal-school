@@ -161,6 +161,83 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // FAQ Accordion Logic
+    const faqItems = document.querySelectorAll('.faq-item');
+    faqItems.forEach(item => {
+        const question = item.querySelector('.faq-question');
+        question.addEventListener('click', () => {
+            const isActive = item.classList.contains('active');
+
+            // Close all other items
+            faqItems.forEach(otherItem => otherItem.classList.remove('active'));
+
+            // Toggle current item
+            if (!isActive) {
+                item.classList.add('active');
+            }
+        });
+    });
+
+    // Enhanced Settings Logic
+    const settingsTabs = document.querySelectorAll('.settings-tab');
+    const tabContents = document.querySelectorAll('.tab-content');
+    const toggleAnimations = document.getElementById('toggle-animations');
+    const clearDataBtn = document.getElementById('clearDataBtn');
+    const backgroundAnim = document.querySelector('.background-animation');
+
+    // Load saved preferences
+    const savedAnim = localStorage.getItem('settings-animations');
+    if (savedAnim === 'false') {
+        toggleAnimations.checked = false;
+        if (backgroundAnim) backgroundAnim.style.display = 'none';
+    }
+
+    const savedNotifs = localStorage.getItem('settings-notifications');
+    if (savedNotifs === 'false') document.getElementById('toggle-notifications').checked = false;
+
+    const savedSounds = localStorage.getItem('settings-sounds');
+    if (savedSounds === 'true') document.getElementById('toggle-sounds').checked = true;
+
+    // Tab Switching
+    settingsTabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            const target = tab.getAttribute('data-tab');
+
+            settingsTabs.forEach(t => t.classList.remove('active'));
+            tabContents.forEach(c => c.classList.remove('active'));
+
+            tab.classList.add('active');
+            document.getElementById(target).classList.add('active');
+        });
+    });
+
+    // Animation Toggle
+    toggleAnimations.addEventListener('change', (e) => {
+        const isEnabled = e.target.checked;
+        localStorage.setItem('settings-animations', isEnabled);
+        if (backgroundAnim) {
+            backgroundAnim.style.display = isEnabled ? 'block' : 'none';
+        }
+    });
+
+    // Other Toggles (Mock functionality)
+    document.getElementById('toggle-notifications').addEventListener('change', (e) => {
+        localStorage.setItem('settings-notifications', e.target.checked);
+    });
+
+    document.getElementById('toggle-sounds').addEventListener('change', (e) => {
+        localStorage.setItem('settings-sounds', e.target.checked);
+    });
+
+    // Clear Data
+    clearDataBtn.addEventListener('click', () => {
+        if (confirm('Are you sure you want to clear all data? This will log you out and reset all records.')) {
+            localStorage.clear();
+            alert('All data has been cleared. Redirecting...');
+            window.location.reload();
+        }
+    });
+
     // Settings form submission handler
     settingsForm.addEventListener('submit', (e) => {
         e.preventDefault();

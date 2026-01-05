@@ -50,6 +50,18 @@
                     <span class="icon">✅</span>
                     <span>Attendance</span>
                 </a>
+                <a href="#" class="menu-item" data-section="resources-student">
+                    <span class="icon">📖</span>
+                    <span>Resources</span>
+                </a>
+                <a href="#" class="menu-item" data-section="leaderboard-student">
+                    <span class="icon">🏆</span>
+                    <span>Leaderboard</span>
+                </a>
+                <a href="#" class="menu-item" data-section="profile">
+                    <span class="icon">👤</span>
+                    <span>Profile</span>
+                </a>
                 <a href="#" class="menu-item logout" id="logoutBtn">
                     <span class="icon">🚪</span>
                     <span>Logout</span>
@@ -89,11 +101,71 @@
                             <p>Upcoming Quizzes</p>
                         </div>
                     </div>
-                    <div class="stat-card">
-                        <div class="stat-icon">📋</div>
-                        <div class="stat-info">
-                            <h3>0</h3>
-                            <p>Tests This Week</p>
+                </div>
+            </section>
+
+            <!-- Resources Section -->
+            <section id="resources-student" class="content-section">
+                <h2>Study Resources</h2>
+                <div class="resources-grid" id="studentResourcesList">
+                    <!-- Resources will be loaded here -->
+                </div>
+            </section>
+
+            <!-- Leaderboard Section -->
+            <section id="leaderboard-student" class="content-section">
+                <h2>Global Leaderboard</h2>
+                <div class="welcome-card"
+                    style="background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); margin-bottom: 2rem;">
+                    <h3>Rise to the Top!</h3>
+                    <p>Compete with your peers and earn your place among the best.</p>
+                </div>
+                <div class="table-container"
+                    style="background: var(--glass-bg); border-radius: 16px; border: 1px solid var(--glass-border); overflow-x: auto;">
+                    <table class="results-table" style="width: 100%; border-collapse: collapse;">
+                        <thead>
+                            <tr style="text-align: left; border-bottom: 1px solid var(--glass-border);">
+                                <th style="padding: 1rem;">Rank</th>
+                                <th style="padding: 1rem;">Student</th>
+                                <th style="padding: 1rem;">Points</th>
+                                <th style="padding: 1rem;">Quizzes</th>
+                            </tr>
+                        </thead>
+                        <tbody id="studentLeaderboardBody">
+                            <!-- Leaderboard data -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Profile Section -->
+            <section id="profile" class="content-section">
+                <h2>My Profile</h2>
+                <div class="form-card"
+                    style="display: flex; flex-direction: column; gap: 2rem; align-items: center; padding: 3rem;">
+                    <div class="profile-avatar"
+                        style="font-size: 5rem; width: 150px; height: 150px; background: rgba(255,255,255,0.05); display: flex; align-items: center; justify-content: center; border-radius: 50%; border: 2px solid var(--primary-color);">
+                        👨‍🎓</div>
+                    <div class="profile-details" style="width: 100%; max-width: 400px;">
+                        <div class="detail-item"
+                            style="display: flex; justify-content: space-between; padding: 1rem 0; border-bottom: 1px solid var(--glass-border);">
+                            <span style="color: #94a3b8;">Full Name</span>
+                            <span id="profileName" style="font-weight: 600;">Student Name</span>
+                        </div>
+                        <div class="detail-item"
+                            style="display: flex; justify-content: space-between; padding: 1rem 0; border-bottom: 1px solid var(--glass-border);">
+                            <span style="color: #94a3b8;">Email Address</span>
+                            <span id="profileEmail" style="font-weight: 600;">student@email.com</span>
+                        </div>
+                        <div class="detail-item"
+                            style="display: flex; justify-content: space-between; padding: 1rem 0; border-bottom: 1px solid var(--glass-border);">
+                            <span style="color: #94a3b8;">Roll Number</span>
+                            <span id="profileRoll" style="font-weight: 600;">001</span>
+                        </div>
+                        <div class="detail-item"
+                            style="display: flex; justify-content: space-between; padding: 1rem 0; border-bottom: 1px solid var(--glass-border);">
+                            <span style="color: #94a3b8;">Status</span>
+                            <span style="color: #10b981; font-weight: 600;">Active Student</span>
                         </div>
                     </div>
                 </div>

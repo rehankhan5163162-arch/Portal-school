@@ -7,8 +7,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const syllabus = JSON.parse(localStorage.getItem('syllabus') || '[]');
     const attendance = JSON.parse(localStorage.getItem('attendance') || '[]');
     const students = JSON.parse(localStorage.getItem('students') || '[]');
+    const resources = JSON.parse(localStorage.getItem('resources') || '[]');
+    const quizResults = JSON.parse(localStorage.getItem('quizResults') || '[]');
+    const adjustments = JSON.parse(localStorage.getItem('leaderboardAdjustments') || '{}');
 
-    // Update stats
+    // Initial displays
+    displayResources(resources);
+    displayLeaderboard(quizResults, adjustments);
+    initResources(resources);
+    initLeaderboardControl(quizResults, adjustments);
     updateStats();
 
     // Responsive Sidebar Logic
@@ -159,7 +166,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const title = document.getElementById('quiz-title').value;
         const duration = document.getElementById('quiz-duration').value;
 
-        const questionBlocks = document.querySelectorAll('.question-block');
+        const container = document.getElementById('questionsContainer');
+        const questionBlocks = container.querySelectorAll('.question-block');
         const questions = [];
 
         questionBlocks.forEach(block => {
@@ -244,7 +252,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const duration = document.getElementById('test-duration').value;
         const totalMarks = document.getElementById('test-marks').value;
 
-        const questionElements = document.querySelectorAll('.test-question-text');
+        const container = document.getElementById('testQuestionsContainer');
+        const questionElements = container.querySelectorAll('.test-question-text');
         const questions = Array.from(questionElements).map(q => q.value);
 
         const test = {
@@ -839,4 +848,161 @@ function saveAssignmentGrade() {
 function backToAssignmentSubmissions() {
     document.getElementById('assignmentGradingInterface').style.display = 'none';
     document.getElementById('assignmentSubmissionsList').style.display = 'grid';
+}
+
+// Resources logic
+function initResources(resources) {
+    if (document.getElementById('resourceForm')) {
+        document.getElementById('resourceForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const title = document.getElementById('resource-title').value;
+            const type = document.getElementById('resource-type').value;
+            const link = document.getElementById('resource-link').value;
+
+            const resource = {
+                id: Date.now(),
+                title,
+                type,
+                link,
+                date: new Date().toLocaleDateString()
+            };
+
+            resources.unshift(resource);
+            localStorage.setItem('resources', JSON.stringify(resources));
+
+            e.target.reset();
+            displayResources(resources);
+            alert('Resource added successfully!');
+        });
+    }
+}
+
+function displayResources(resources) {
+    const list = document.getElementById('resourcesList');
+    if (!list) return;
+
+    const container = document.createElement('div');
+    container.className = 'resources-grid';
+    container.style.display = 'grid';
+    container.style.gridTemplateColumns = 'repeat(auto-fill, minmax(250px, 1fr))';
+    container.style.gap = '1rem';
+    container.style.marginTop = '1rem';
+
+    if (resources.length === 0) {
+        list.innerHTML = '<h3>Current Resources</h3><p style="color: #94a3b8;">No resources shared yet.</p>';
+        return;
+    }
+
+    list.innerHTML = '<h3>Current Resources</h3>';
+    resources.forEach(res => {
+        const card = document.createElement('div');
+        card.className = 'resource-card';
+        card.style.background = 'rgba(255,255,255,0.03)';
+        card.style.padding = '1rem';
+        card.style.borderRadius = '12px';
+        card.style.border = '1px solid var(--glass-border)';
+        card.style.position = 'relative';
+
+        card.innerHTML = `
+            <span style="position: absolute; top: 0.5rem; right: 0.5rem; font-size: 0.8rem; background: var(--primary-color); padding: 2px 8px; border-radius: 10px;">${res.type}</span>
+            <h4 style="margin-bottom: 0.5rem;">${res.title}</h4>
+            <p style="font-size: 0.8rem; color: #94a3b8; margin-bottom: 1rem;">Added on ${res.date}</p>
+            <div style="display: flex; gap: 0.5rem;">
+                <a href="${res.link}" target="_blank" class="btn-primary" style="padding: 5px 15px; font-size: 0.85rem; text-decoration: none;">View</a>
+                <button class="btn-text-only delete-resource" data-id="${res.id}" style="padding: 5px 15px; font-size: 0.85rem; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2); color: #ef4444; border-radius: 8px;">Delete</button>
+            </div>
+        `;
+        container.appendChild(card);
+    });
+    list.appendChild(container);
+
+    // Delete handlers
+    document.querySelectorAll('.delete-resource').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const id = parseInt(btn.getAttribute('data-id'));
+            if (confirm('Delete this resource?')) {
+                const idx = resources.findIndex(r => r.id === id);
+                resources.splice(idx, 1);
+                localStorage.setItem('resources', JSON.stringify(resources));
+                displayResources(resources);
+            }
+        });
+    });
+}
+
+function displayLeaderboard(quizResults, adjustments = {}) {
+    const tbody = document.getElementById('globalLeaderboardBody');
+    if (!tbody) return;
+
+    // Calculate scores per student
+    const leaderboardData = {};
+
+    // First, process all known students to include adjustments even without quizzes
+    const studentsArr = JSON.parse(localStorage.getItem('students') || '[]');
+    studentsArr.forEach(student => {
+        const email = student.email;
+        leaderboardData[email] = {
+            name: student.name,
+            quizPoints: 0,
+            adjustment: adjustments[email] || 0,
+            totalPoints: adjustments[email] || 0,
+            quizzes: 0
+        };
+    });
+
+    // Then, add quiz results
+    quizResults.forEach(result => {
+        const email = result.email;
+        if (!leaderboardData[email]) {
+            leaderboardData[email] = {
+                name: result.studentName || email.split('@')[0],
+                quizPoints: 0,
+                adjustment: adjustments[email] || 0,
+                totalPoints: adjustments[email] || 0,
+                quizzes: 0
+            };
+        }
+        leaderboardData[email].quizPoints += parseInt(result.score);
+        leaderboardData[email].totalPoints += parseInt(result.score);
+        leaderboardData[email].quizzes += 1;
+    });
+
+    // Convert to array and sort
+    const sortedScores = Object.values(leaderboardData).sort((a, b) => b.totalPoints - a.totalPoints);
+
+    if (sortedScores.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 2rem; color: #94a3b8;">No student records found.</td></tr>';
+        return;
+    }
+
+    tbody.innerHTML = sortedScores.map((student, index) => `
+        <tr>
+            <td><span style="display: flex; align-items: center; justify-content: center; width: 30px; height: 30px; background: ${index === 0 ? '#ffd700' : index === 1 ? '#c0c0c0' : index === 2 ? '#cd7f32' : 'rgba(255,255,255,0.05)'}; color: ${index < 3 ? '#000' : '#fff'}; border-radius: 50%; font-weight: bold;">${index + 1}</span></td>
+            <td>${student.name}</td>
+            <td style="color: #94a3b8;">${student.quizPoints} pts</td>
+            <td style="color: ${student.adjustment >= 0 ? '#10b981' : '#ef4444'};">${student.adjustment >= 0 ? '+' : ''}${student.adjustment}</td>
+            <td style="font-weight: 600; color: var(--primary-color);">${student.totalPoints} pts</td>
+            <td>${student.quizzes}</td>
+        </tr>
+    `).join('');
+}
+
+function initLeaderboardControl(quizResults, adjustments) {
+    const form = document.getElementById('leaderboardAdjustmentForm');
+    if (!form) return;
+
+    form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const email = document.getElementById('adj-email').value;
+        const points = parseInt(document.getElementById('adj-points').value);
+
+        if (!email || isNaN(points)) return;
+
+        adjustments[email] = (adjustments[email] || 0) + points;
+        localStorage.setItem('leaderboardAdjustments', JSON.stringify(adjustments));
+
+        displayLeaderboard(quizResults, adjustments);
+        e.target.reset();
+        alert(`Points updated for ${email}`);
+    });
 }

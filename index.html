@@ -61,7 +61,7 @@
         </section>
 
         <section class="section features-section">
-            <h2 class="section-title">Why Choose EduSphere?</h2>
+            <h2 class="section-title">Why Choose Rehankhan Acadmy?</h2>
             <div class="features-grid">
                 <div class="feature-card">
                     <span class="feature-icon">🚀</span>
@@ -77,6 +77,60 @@
                     <span class="feature-icon">🛡️</span>
                     <h3>Secure Learning</h3>
                     <p>A safe, controlled environment for students and administrators to manage educational goals.</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="section testimonials-section">
+            <h2 class="section-title">What Our Students Say</h2>
+            <div class="testimonials-grid">
+                <div class="testimonial-card">
+                    <p class="quote">"The MCQ quizzes helped me track my progress daily. The glassmorphic design is just
+                        the cherry on top!"</p>
+                    <div class="student-info">
+                        <span class="student-avatar">👨‍🎓</span>
+                        <div>
+                            <h4>Aman Gupta</h4>
+                            <p>Grade 12 Student</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="testimonial-card">
+                    <p class="quote">"The administrative portal is so easy to use. Posting announcements and grading
+                        tests is a breeze."</p>
+                    <div class="student-info">
+                        <span class="student-avatar">👩‍🏫</span>
+                        <div>
+                            <h4>Sarah Khan</h4>
+                            <p>Senior Faculty</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section faq-section">
+            <h2 class="section-title">Frequently Asked Questions</h2>
+            <div class="faq-accordion">
+                <div class="faq-item">
+                    <button class="faq-question">How do I access my dashboard? <span>+</span></button>
+                    <div class="faq-answer">
+                        <p>Simply log in using your registered email and roll number. If you're an admin, use the
+                            settings portal.</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <button class="faq-question">Can I take quizzes on mobile? <span>+</span></button>
+                    <div class="faq-answer">
+                        <p>Yes! EduSphere is fully responsive and works perfectly on mobile phones and tablets.</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <button class="faq-question">How are tests graded? <span>+</span></button>
+                    <div class="faq-answer">
+                        <p>MCQs are auto-graded instantly, while descriptive tests are manually reviewed by teachers.
+                        </p>
+                    </div>
                 </div>
             </div>
         </section>
@@ -155,20 +209,84 @@
 
     <!-- Settings Modal -->
     <div id="settingsModal" class="modal">
-        <div class="modal-content">
+        <div class="modal-content settings-panel">
             <span class="close" data-modal="settingsModal">&times;</span>
-            <h2>Settings Access</h2>
-            <form id="settingsForm">
-                <div class="form-group">
-                    <label for="settings-password">Enter Password</label>
-                    <input type="password" id="settings-password" name="password" placeholder="Enter admin password"
-                        required>
+            <div class="settings-header">
+                <h2>Settings</h2>
+                <div class="settings-tabs">
+                    <button class="settings-tab active" data-tab="tab-preferences">Preferences</button>
+                    <button class="settings-tab" data-tab="tab-admin">Admin Access</button>
                 </div>
-                <button type="submit" class="btn primary">
-                    <span class="btn-text">Access</span>
-                    <div class="btn-shine"></div>
-                </button>
-            </form>
+            </div>
+
+            <div id="tab-preferences" class="tab-content active">
+                <div class="settings-list">
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <span class="setting-icon">✨</span>
+                            <div>
+                                <h4>Background Animations</h4>
+                                <p>Enable flowing visual effects</p>
+                            </div>
+                        </div>
+                        <label class="switch">
+                            <input type="checkbox" id="toggle-animations" checked>
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <span class="setting-icon">🔔</span>
+                            <div>
+                                <h4>Notifications</h4>
+                                <p>Get alerts for new assignments</p>
+                            </div>
+                        </div>
+                        <label class="switch">
+                            <input type="checkbox" id="toggle-notifications" checked>
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <span class="setting-icon">🔊</span>
+                            <div>
+                                <h4>Sound Effects</h4>
+                                <p>Interactive click sounds</p>
+                            </div>
+                        </div>
+                        <label class="switch">
+                            <input type="checkbox" id="toggle-sounds">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    <div class="setting-item dangerous">
+                        <div class="setting-info">
+                            <span class="setting-icon">🧹</span>
+                            <div>
+                                <h4>Clear All Data</h4>
+                                <p>Reset sessions and local storage</p>
+                            </div>
+                        </div>
+                        <button id="clearDataBtn" class="btn-text-only">Clear</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="tab-admin" class="tab-content">
+                <p class="admin-notice">Enter password to access administrator dashboard and management tools.</p>
+                <form id="settingsForm">
+                    <div class="form-group">
+                        <label for="settings-password">Admin Password</label>
+                        <input type="password" id="settings-password" name="password" placeholder="Enter password"
+                            required>
+                    </div>
+                    <button type="submit" class="btn primary">
+                        <span class="btn-text">Access Portal</span>
+                        <div class="btn-shine"></div>
+                    </button>
+                </form>
+            </div>
         </div>
     </div>
 

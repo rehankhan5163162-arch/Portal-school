@@ -485,6 +485,20 @@ body {
 /* Table Styles */
 .table-container {
     overflow-x: auto;
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 12px;
+    border: 1px solid var(--glass-border);
+    margin-top: 1rem;
+    -webkit-overflow-scrolling: touch;
+}
+
+.table-container::-webkit-scrollbar {
+    height: 6px;
+}
+
+.table-container::-webkit-scrollbar-thumb {
+    background: var(--glass-border);
+    border-radius: 10px;
 }
 
 .results-table {
@@ -566,27 +580,30 @@ body {
     }
 
     .options-grid {
-        grid-template-columns: 1fr;
+        grid-template-columns: 1fr !important;
     }
 
     .modal-content {
-        width: 95%;
-        margin: 10px;
-        padding: 1.5rem;
+        width: 100%;
+        margin: 0;
+        border-radius: 0;
+        height: 100vh;
+        max-height: 100vh;
     }
 
     .welcome-card {
-        padding: 1.5rem;
+        padding: 1.5rem 1rem;
     }
 
     .form-card {
-        padding: 1.5rem;
+        padding: 1.5rem 1rem;
     }
 
     .btn-primary,
     .btn-secondary {
         width: 100%;
         margin-right: 0;
+        margin-bottom: 0.5rem;
     }
 
     .modal-body {
@@ -597,6 +614,12 @@ body {
     .results-table td {
         padding: 0.75rem 0.5rem;
         font-size: 0.85rem;
+        white-space: nowrap;
+    }
+
+    /* Resource grid mobile */
+    .resources-grid {
+        grid-template-columns: 1fr !important;
     }
 }
 

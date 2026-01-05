@@ -99,6 +99,9 @@ document.addEventListener('DOMContentLoaded', () => {
         displayTests();
         displaySyllabus();
         displayAttendance();
+        displayResources();
+        displayLeaderboard();
+        displayProfile();
         updateStats();
     }
 
@@ -730,4 +733,89 @@ document.addEventListener('DOMContentLoaded', () => {
             errorEl.style.display = 'block';
         };
     };
+
+    function displayResources() {
+        const resources = JSON.parse(localStorage.getItem('resources') || '[]');
+        const list = document.getElementById('studentResourcesList');
+        if (!list) return;
+
+        if (resources.length === 0) {
+            list.innerHTML = '<p style="color: #94a3b8; padding: 2rem;">No study resources have been shared yet. Check back later!</p>';
+            return;
+        }
+
+        list.innerHTML = resources.map(res => `
+            <div class="stat-card" style="flex-direction: column; align-items: flex-start; gap: 1rem; position: relative;">
+                <span style="position: absolute; top: 1rem; right: 1rem; font-size: 0.75rem; background: var(--primary-color); padding: 2px 8px; border-radius: 10px;">${res.type}</span>
+                <div style="font-size: 1.5rem;">${res.type === 'Video' ? '🎥' : res.type === 'PDF' ? '📄' : '🔗'}</div>
+                <div>
+                    <h4 style="color: white; margin-bottom: 0.25rem;">${res.title}</h4>
+                    <p style="font-size: 0.8rem; color: #94a3b8;">Shared on ${res.date}</p>
+                </div>
+                <a href="${res.link}" target="_blank" class="btn-primary" style="width: 100%; text-align: center; text-decoration: none; font-size: 0.9rem; padding: 0.6rem;">Access Material</a>
+            </div>
+        `).join('');
+    }
+
+    function displayLeaderboard() {
+        const quizResults = JSON.parse(localStorage.getItem('quizResults') || '[]');
+        const adjustments = JSON.parse(localStorage.getItem('leaderboardAdjustments') || '{}');
+        const students = JSON.parse(localStorage.getItem('students') || '[]');
+        const tbody = document.getElementById('studentLeaderboardBody');
+        if (!tbody) return;
+
+        const leaderboardData = {};
+
+        // Process all students
+        students.forEach(student => {
+            const email = student.email;
+            leaderboardData[email] = {
+                name: student.name,
+                points: adjustments[email] || 0,
+                quizzes: 0
+            };
+        });
+
+        // Add quiz results
+        quizResults.forEach(result => {
+            const email = result.email;
+            if (!leaderboardData[email]) {
+                leaderboardData[email] = {
+                    name: result.studentName || email.split('@')[0],
+                    points: adjustments[email] || 0,
+                    quizzes: 0
+                };
+            }
+            leaderboardData[email].points += parseInt(result.score);
+            leaderboardData[email].quizzes += 1;
+        });
+
+        const sortedScores = Object.values(leaderboardData).sort((a, b) => b.points - a.points);
+
+        if (sortedScores.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; padding: 3rem; color: #94a3b8;">Rankings are empty.</td></tr>';
+            return;
+        }
+
+        tbody.innerHTML = sortedScores.map((student, index) => `
+            <tr style="border-bottom: 1px solid rgba(255,255,255,0.03);">
+                <td style="padding: 1.25rem;"><span style="display: flex; align-items: center; justify-content: center; width: 28px; height: 28px; background: ${index === 0 ? '#ffd700' : index === 1 ? '#c0c0c0' : index === 2 ? '#cd7f32' : 'rgba(255,255,255,0.05)'}; color: ${index < 3 ? '#000' : '#fff'}; border-radius: 50%; font-weight: bold; font-size: 0.85rem;">${index + 1}</span></td>
+                <td style="padding: 1.25rem;">
+                    <div style="display: flex; align-items: center; gap: 0.75rem;">
+                        <span style="font-size: 1.2rem;">${index === 0 ? '👑' : '👤'}</span>
+                        <span style="font-weight: 500;">${student.name} ${student.name === currentUser.name ? '(You)' : ''}</span>
+                    </div>
+                </td>
+                <td style="padding: 1.25rem; font-weight: 600; color: var(--primary-color);">${student.points}</td>
+                <td style="padding: 1.25rem;">${student.quizzes}</td>
+            </tr>
+        `).join('');
+    }
+
+    function displayProfile() {
+        if (!currentUser) return;
+        document.getElementById('profileName').textContent = currentUser.name || 'N/A';
+        document.getElementById('profileEmail').textContent = currentUser.email || 'N/A';
+        document.getElementById('profileRoll').textContent = currentUser.rollNumber || 'N/A';
+    }
 });
