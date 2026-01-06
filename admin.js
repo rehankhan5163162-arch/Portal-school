@@ -1,22 +1,61 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // Initialize data from localStorage
-    const announcements = JSON.parse(localStorage.getItem('announcements') || '[]');
-    const assignments = JSON.parse(localStorage.getItem('assignments') || '[]');
-    const quizzes = JSON.parse(localStorage.getItem('quizzes') || '[]');
-    const tests = JSON.parse(localStorage.getItem('tests') || '[]');
-    const syllabus = JSON.parse(localStorage.getItem('syllabus') || '[]');
-    const attendance = JSON.parse(localStorage.getItem('attendance') || '[]');
-    const students = JSON.parse(localStorage.getItem('students') || '[]');
-    const resources = JSON.parse(localStorage.getItem('resources') || '[]');
-    const quizResults = JSON.parse(localStorage.getItem('quizResults') || '[]');
-    const adjustments = JSON.parse(localStorage.getItem('leaderboardAdjustments') || '{}');
+    // Initialize data placeholders
+    let announcements = [];
+    let assignments = [];
+    let quizzes = [];
+    let tests = [];
+    let syllabus = [];
+    let attendance = [];
+    let students = [];
+    let resources = [];
+    let quizResults = [];
+    let adjustments = {};
 
-    // Initial displays
-    displayResources(resources);
-    displayLeaderboard(quizResults, adjustments);
-    initResources(resources);
-    initLeaderboardControl(quizResults, adjustments);
-    updateStats();
+    // REAL-TIME DATABASE LISTENERS
+    function setupFirebaseListeners() {
+        const refs = {
+            'announcements': (data) => { announcements = data; displayAnnouncements(); },
+            'assignments': (data) => { assignments = data; displayAssignments(); },
+            'quizzes': (data) => { quizzes = data; displayQuizzes(); },
+            'tests': (data) => { tests = data; displayTests(); },
+            'syllabus': (data) => { syllabus = data; displaySyllabus(); },
+            'attendance': (data) => { attendance = data; displayAttendance(); },
+            'students': (data) => { students = data; displayStudents(); },
+            'resources': (data) => { resources = data; displayResources(resources); initResources(resources); },
+            'quizResults': (data) => { quizResults = data; displayLeaderboard(quizResults, adjustments); initLeaderboardControl(quizResults, adjustments); },
+            'leaderboardAdjustments': (data) => { adjustments = data || {}; displayLeaderboard(quizResults, adjustments); initLeaderboardControl(quizResults, adjustments); },
+            'testResults': (data) => { /* handled inside specific views if needed, or kept in sync */ },
+            'assignmentSubmissions': (data) => { /* same */ }
+        };
+
+        Object.keys(refs).forEach(key => {
+            database.ref(key).on('value', (snapshot) => {
+                const val = snapshot.val();
+                let data = [];
+                if (val) {
+                    if (key === 'leaderboardAdjustments') {
+                        data = val;
+                    } else {
+                        // Convert object to array for compatibility with existing display logic
+                        data = Object.keys(val).map(id => ({ ...val[id], firebaseId: id }));
+                    }
+                }
+                refs[key](data);
+                updateStats();
+            });
+        });
+    }
+
+    // Initialize listeners
+    setupFirebaseListeners();
+
+    // Stats update helper
+    function updateStats() {
+        document.getElementById('totalAnnouncements').textContent = announcements.length;
+        document.getElementById('totalAssignments').textContent = assignments.length;
+        document.getElementById('totalQuizzes').textContent = quizzes.length;
+        document.getElementById('totalStudents').textContent = students.length;
+    }
 
     // Responsive Sidebar Logic
     const sidebar = document.querySelector('.sidebar');
@@ -90,12 +129,9 @@ document.addEventListener('DOMContentLoaded', () => {
             date: new Date().toLocaleDateString()
         };
 
-        announcements.unshift(announcement);
-        localStorage.setItem('announcements', JSON.stringify(announcements));
+        database.ref('announcements').push(announcement);
 
         e.target.reset();
-        displayAnnouncements();
-        updateStats();
         alert('Announcement posted successfully!');
     });
 
@@ -119,12 +155,9 @@ document.addEventListener('DOMContentLoaded', () => {
             createdDate: new Date().toLocaleDateString()
         };
 
-        assignments.push(assignment);
-        localStorage.setItem('assignments', JSON.stringify(assignments));
+        database.ref('assignments').push(assignment);
 
         e.target.reset();
-        displayAssignments();
-        updateStats();
         alert('Assignment created successfully!');
     });
 
@@ -190,8 +223,7 @@ document.addEventListener('DOMContentLoaded', () => {
             createdDate: new Date().toLocaleDateString()
         };
 
-        quizzes.push(quiz);
-        localStorage.setItem('quizzes', JSON.stringify(quizzes));
+        database.ref('quizzes').push(quiz);
 
         e.target.reset();
         // Reset to 1 question
@@ -221,8 +253,6 @@ document.addEventListener('DOMContentLoaded', () => {
             </div>
         `;
         questionCount = 1;
-        displayQuizzes();
-        updateStats();
         alert('Quiz created successfully!');
     });
 
@@ -267,8 +297,7 @@ document.addEventListener('DOMContentLoaded', () => {
             questions
         };
 
-        tests.push(test);
-        localStorage.setItem('tests', JSON.stringify(tests));
+        database.ref('tests').push(test);
 
         e.target.reset();
 
@@ -284,7 +313,6 @@ document.addEventListener('DOMContentLoaded', () => {
         `;
         testQuestionCount = 1;
 
-        displayTests();
         alert('Test scheduled successfully!');
     });
 
@@ -300,11 +328,9 @@ document.addEventListener('DOMContentLoaded', () => {
             topics
         };
 
-        syllabus.push(syllabusItem);
-        localStorage.setItem('syllabus', JSON.stringify(syllabus));
+        database.ref('syllabus').push(syllabusItem);
 
         e.target.reset();
-        displaySyllabus();
         alert('Syllabus updated successfully!');
     });
 
@@ -322,44 +348,45 @@ document.addEventListener('DOMContentLoaded', () => {
             status
         };
 
-        attendance.push(attendanceRecord);
-        localStorage.setItem('attendance', JSON.stringify(attendance));
+        database.ref('attendance').push(attendanceRecord);
 
         e.target.reset();
-        displayAttendance();
         alert('Attendance updated successfully!');
     });
 
     // Display functions
     function displayAnnouncements() {
         const list = document.getElementById('announcementsList');
-        const announcements = JSON.parse(localStorage.getItem('announcements') || '[]');
 
         if (announcements.length === 0) {
             list.innerHTML = '<h3>Recent Announcements</h3><p style="color: #94a3b8;">No announcements yet.</p>';
             return;
         }
 
-        list.innerHTML = '<h3>Recent Announcements</h3>' + announcements.map(a => `
+        // Sort by date (newest first)
+        const sorted = [...announcements].sort((a, b) => b.id - a.id);
+
+        list.innerHTML = '<h3>Recent Announcements</h3>' + sorted.map(a => `
             <div class="item-card">
                 <h4>${a.title}</h4>
                 <p>${a.message}</p>
                 <div class="meta">Posted on: ${a.date}</div>
-                <button class="btn-delete" onclick="deleteItem('announcements', ${a.id})">Delete</button>
+                <button class="btn-delete" onclick="deleteItem('announcements', '${a.firebaseId}')">Delete</button>
             </div>
         `).join('');
     }
 
     function displayAssignments() {
         const list = document.getElementById('assignmentsList');
-        const assignments = JSON.parse(localStorage.getItem('assignments') || '[]');
 
         if (assignments.length === 0) {
             list.innerHTML = '<h3>All Assignments</h3><p style="color: #94a3b8;">No assignments yet.</p>';
             return;
         }
 
-        list.innerHTML = '<h3>All Assignments</h3>' + assignments.map(a => `
+        const sorted = [...assignments].sort((a, b) => b.id - a.id);
+
+        list.innerHTML = '<h3>All Assignments</h3>' + sorted.map(a => `
             <div class="item-card">
                 <h4>${a.title}</h4>
                 <p><strong>Subject:</strong> ${a.subject}</p>
@@ -367,8 +394,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 <p><strong>Marks:</strong> ${a.marks || 'N/A'} | <strong>Due:</strong> ${a.dueDate}</p>
                 <div class="meta">Created: ${a.createdDate}</div>
                 <div style="margin-top: 1rem;">
-                    <button class="btn-view" onclick="gradeAssignment(${a.id})">Grade Assignment</button>
-                    <button class="btn-delete" onclick="deleteItem('assignments', ${a.id})">Delete</button>
+                    <button class="btn-view" onclick="gradeAssignment('${a.firebaseId}')">Grade Assignment</button>
+                    <button class="btn-delete" onclick="deleteItem('assignments', '${a.firebaseId}')">Delete</button>
                 </div>
             </div>
         `).join('');
@@ -376,21 +403,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function displayQuizzes() {
         const list = document.getElementById('quizList');
-        const quizzes = JSON.parse(localStorage.getItem('quizzes') || '[]');
 
         if (quizzes.length === 0) {
             list.innerHTML = '<h3>All Quizzes</h3><p style="color: #94a3b8;">No quizzes yet.</p>';
             return;
         }
 
-        list.innerHTML = '<h3>All Quizzes</h3>' + quizzes.map(q => `
+        const sorted = [...quizzes].sort((a, b) => b.id - a.id);
+
+        list.innerHTML = '<h3>All Quizzes</h3>' + sorted.map(q => `
             <div class="item-card">
                 <h4>${q.title}</h4>
                 <p><strong>Questions:</strong> ${q.questions.length} | <strong>Duration:</strong> ${q.duration} minutes</p>
                 <div class="meta">Created: ${q.createdDate}</div>
                 <div style="margin-top: 1rem;">
-                    <button class="btn-view" onclick="viewResults(${q.id})">View Results</button>
-                    <button class="btn-delete" onclick="deleteItem('quizzes', ${q.id})">Delete</button>
+                    <button class="btn-view" onclick="viewResults('${q.firebaseId}')">View Results</button>
+                    <button class="btn-delete" onclick="deleteItem('quizzes', '${q.firebaseId}')">Delete</button>
                 </div>
             </div>
         `).join('');
@@ -398,22 +426,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function displayTests() {
         const list = document.getElementById('testsList');
-        const tests = JSON.parse(localStorage.getItem('tests') || '[]');
 
         if (tests.length === 0) {
             list.innerHTML = '<h3>Scheduled Tests</h3><p style="color: #94a3b8;">No tests scheduled.</p>';
             return;
         }
 
-        list.innerHTML = '<h3>Scheduled Tests</h3>' + tests.map(t => `
+        const sorted = [...tests].sort((a, b) => b.id - a.id);
+
+        list.innerHTML = '<h3>Scheduled Tests</h3>' + sorted.map(t => `
             <div class="item-card">
                 <h4>${t.title}</h4>
                 <p><strong>Subject:</strong> ${t.subject}</p>
                 <div class="meta">Date: ${t.date} at ${t.time}</div>
                 <div class="meta">Duration: ${t.duration || 'N/A'} mins | Marks: ${t.totalMarks || 'N/A'}</div>
                 <div style="margin-top: 1rem;">
-                    <button class="btn-view" onclick="gradeTest(${t.id})">Grade Test</button>
-                    <button class="btn-delete" onclick="deleteItem('tests', ${t.id})">Delete</button>
+                    <button class="btn-view" onclick="gradeTest('${t.firebaseId}')">Grade Test</button>
+                    <button class="btn-delete" onclick="deleteItem('tests', '${t.firebaseId}')">Delete</button>
                 </div>
             </div>
             `).join('');
@@ -421,7 +450,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function displaySyllabus() {
         const list = document.getElementById('syllabusList');
-        const syllabus = JSON.parse(localStorage.getItem('syllabus') || '[]');
 
         if (syllabus.length === 0) {
             list.innerHTML = '<h3>Current Syllabus</h3><p style="color: #94a3b8;">No syllabus added yet.</p>';
@@ -434,48 +462,48 @@ document.addEventListener('DOMContentLoaded', () => {
                 <ul style="margin-top: 1rem; list-style: none;">
                     ${s.topics.map(topic => `<li style="padding: 0.5rem 0; color: #94a3b8;">→ ${topic}</li>`).join('')}
                 </ul>
-                <button class="btn-delete" onclick="deleteItem('syllabus', ${s.id})">Delete</button>
+                <button class="btn-delete" onclick="deleteItem('syllabus', '${s.firebaseId}')">Delete</button>
             </div>
             `).join('');
     }
 
     function displayAttendance() {
         const list = document.getElementById('attendanceList');
-        const attendance = JSON.parse(localStorage.getItem('attendance') || '[]');
 
         if (attendance.length === 0) {
             list.innerHTML = '<h3>Attendance Records</h3><p style="color: #94a3b8;">No attendance records yet.</p>';
             return;
         }
 
-        list.innerHTML = '<h3>Attendance Records</h3>' + attendance.map(a => `
+        const sorted = [...attendance].sort((a, b) => b.id - a.id);
+
+        list.innerHTML = '<h3>Attendance Records</h3>' + sorted.map(a => `
             <div class="item-card">
                 <h4>Roll Number: ${a.rollNumber}</h4>
                 <p><strong>Status:</strong> <span style="color: ${a.status === 'present' ? '#10b981' : '#ef4444'}; text-transform: capitalize;">${a.status}</span></p>
                 <div class="meta">Date: ${a.date}</div>
-                <button class="btn-delete" onclick="deleteItem('attendance', ${a.id})">Delete</button>
+                <button class="btn-delete" onclick="deleteItem('attendance', '${a.firebaseId}')">Delete</button>
             </div>
             `).join('');
     }
 
     function displayStudents() {
         const list = document.getElementById('studentsList');
-        const students = JSON.parse(localStorage.getItem('students') || '[]');
 
         if (students.length === 0) {
             list.innerHTML = '<h3>All Students</h3><p style="color: #94a3b8;">No students registered yet.</p>';
             return;
         }
 
-        list.innerHTML = '<h3>All Students</h3>' + students.map((s, index) => `
+        list.innerHTML = '<h3>All Students</h3>' + students.map((s) => `
             <div class="item-card">
                 <h4>${s.name}</h4>
                 <p><strong>Roll Number:</strong> ${s.rollNumber}</p>
                 <p><strong>Email:</strong> ${s.email}</p>
                 <div class="meta">Class: ${s.class}</div>
-                <button class="btn-delete" onclick="deleteStudent(${index})">Remove</button>
+                <button class="btn-delete" onclick="deleteStudent('${s.firebaseId}')">Remove</button>
             </div>
-            `).join('');
+        `).join('');
     }
 
     function updateStats() {
@@ -491,46 +519,23 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Global delete function
-    window.deleteItem = function (type, id) {
+    window.deleteItem = function (type, firebaseId) {
         if (confirm('Are you sure you want to delete this item?')) {
-            const items = JSON.parse(localStorage.getItem(type) || '[]');
-            const filtered = items.filter(item => item.id !== id);
-            localStorage.setItem(type, JSON.stringify(filtered));
-
-            // Refresh the appropriate display
-            switch (type) {
-                case 'announcements':
-                    displayAnnouncements();
-                    break;
-                case 'assignments':
-                    displayAssignments();
-                    break;
-                case 'quizzes':
-                    displayQuizzes();
-                    break;
-                case 'tests':
-                    displayTests();
-                    break;
-                case 'syllabus':
-                    displaySyllabus();
-                    break;
-                case 'attendance':
-                    displayAttendance();
-                    break;
-            }
-
-            updateStats();
+            database.ref(type).child(firebaseId).remove();
         }
     };
 
     // Delete student function
-    window.deleteStudent = function (index) {
+    window.deleteStudent = function (firebaseId) {
         if (confirm('Are you sure you want to remove this student?')) {
-            const students = JSON.parse(localStorage.getItem('students') || '[]');
-            students.splice(index, 1);
-            localStorage.setItem('students', JSON.stringify(students));
-            displayStudents();
-            updateStats();
+            database.ref('students').child(firebaseId).remove();
+        }
+    };
+
+    // Delete resource helper
+    window.deleteResource = function (firebaseId) {
+        if (confirm('Delete this resource?')) {
+            database.ref('resources').child(firebaseId).remove();
         }
     };
 
@@ -558,451 +563,365 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     window.addEventListener('click', window.clickOutside);
 
-    window.viewResults = function (quizId) {
-        const quizzes = JSON.parse(localStorage.getItem('quizzes') || '[]');
-        const results = JSON.parse(localStorage.getItem('quizResults') || '[]');
-        const quiz = quizzes.find(q => q.id === quizId);
+    window.viewResults = function (quizFirebaseId) {
+        database.ref('quizResults').once('value', (snapshot) => {
+            const resultsVal = snapshot.val();
+            const results = resultsVal ? Object.keys(resultsVal).map(id => ({ ...resultsVal[id], firebaseId: id })) : [];
+            const quiz = quizzes.find(q => q.firebaseId === quizFirebaseId);
 
-        if (!quiz) return;
+            if (!quiz) return;
 
-        document.getElementById('resultsModalTitle').textContent = `Results: ${quiz.title} `;
-        const tbody = document.getElementById('resultsTableBody');
+            document.getElementById('resultsModalTitle').textContent = `Results: ${quiz.title} `;
+            const tbody = document.getElementById('resultsTableBody');
 
-        // Filter results for this quiz
-        const quizResults = results.filter(r => r.quizId === quizId);
+            // Filter results for this quiz (using the numeric id for filtering if that's what's stored)
+            const filteredResults = results.filter(r => r.quizId == quiz.id);
 
-        // Sort by Score (Desc) then Date (Desc)
-        quizResults.sort((a, b) => b.score - a.score || new Date(b.date) - new Date(a.date));
+            // Sort by Score (Desc) then Date (Desc)
+            filteredResults.sort((a, b) => b.score - a.score || new Date(b.date) - new Date(a.date));
 
-        if (quizResults.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 2rem;">No students have taken this quiz yet.</td></tr>';
-        } else {
-            tbody.innerHTML = quizResults.map(r => {
-                const percentage = Math.round((r.score / r.total) * 100);
-                let colorClass = '#ef4444'; // Red
-                if (percentage >= 80) colorClass = '#10b981'; // Green
-                else if (percentage >= 60) colorClass = '#f59e0b'; // Orange
+            if (filteredResults.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 2rem;">No students have taken this quiz yet.</td></tr>';
+            } else {
+                tbody.innerHTML = filteredResults.map(r => {
+                    const percentage = Math.round((r.score / r.total) * 100);
+                    let colorClass = '#ef4444'; // Red
+                    if (percentage >= 80) colorClass = '#10b981'; // Green
+                    else if (percentage >= 60) colorClass = '#f59e0b'; // Orange
 
-                return `
-            <tr>
-                        <td><strong>${r.studentName || 'Unknown'}</strong></td>
-                        <td>${r.rollNumber || 'N/A'}</td>
-                        <td><span style="font-weight: bold; color: ${colorClass}">${r.score} / ${r.total}</span></td>
-                        <td><span style="padding: 2px 8px; border-radius: 10px; background: ${colorClass}20; color: ${colorClass}; font-size: 0.85rem; font-weight: 600;">${percentage}%</span></td>
-                        <td>${r.date} <span style="font-size: 0.8em; color: #64748b; margin-left: 5px;">${r.time}</span></td>
-            </tr>
-            `;
-            }).join('');
-        }
-
-        resultsModal.classList.add('active');
+                    return `
+                <tr>
+                            <td><strong>${r.studentName || 'Unknown'}</strong></td>
+                            <td>${r.rollNumber || 'N/A'}</td>
+                            <td><span style="font-weight: bold; color: ${colorClass}">${r.score} / ${r.total}</span></td>
+                            <td><span style="padding: 2px 8px; border-radius: 10px; background: ${colorClass}20; color: ${colorClass}; font-size: 0.85rem; font-weight: 600;">${percentage}%</span></td>
+                            <td>${r.date} <span style="font-size: 0.8em; color: #64748b; margin-left: 5px;">${r.time}</span></td>
+                </tr>
+                `;
+                }).join('');
+            }
+            resultsModal.classList.add('active');
+        });
     };
 
-    // Grading Modal Logic
-    const gradingModal = document.getElementById('gradingModal');
-    const closeGradingBtn = document.getElementById('closeGradingModal');
+    window.gradeTest = function (testFirebaseId) {
+        database.ref('testResults').once('value', (snapshot) => {
+            const resultsVal = snapshot.val();
+            const results = resultsVal ? Object.keys(resultsVal).map(id => ({ ...resultsVal[id], firebaseId: id })) : [];
+            const test = tests.find(t => t.firebaseId === testFirebaseId);
 
-    closeGradingBtn.addEventListener('click', () => {
-        gradingModal.classList.remove('active');
-        document.getElementById('gradingInterface').style.display = 'none';
-        document.getElementById('studentSubmissionsList').style.display = 'block';
-    });
+            if (!test) return;
 
-    window.gradeTest = function (testId) {
-        const tests = JSON.parse(localStorage.getItem('tests') || '[]');
-        const results = JSON.parse(localStorage.getItem('testResults') || '[]');
-        const test = tests.find(t => t.id === testId);
+            document.getElementById('gradingModalTitle').textContent = `Grade: ${test.title}`;
+            const submissionsList = document.getElementById('studentSubmissionsList');
 
-        if (!test) return;
+            // Filter results for this test
+            const testSubmissions = results.filter(r => r.testId == test.id);
 
-        document.getElementById('gradingModalTitle').textContent = `Grade: ${test.title}`;
-        const submissionsList = document.getElementById('studentSubmissionsList');
-
-        // Filter results for this test
-        const testSubmissions = results.filter(r => r.testId === testId);
-
-        if (testSubmissions.length === 0) {
-            submissionsList.innerHTML = '<p style="text-align: center; color: #94a3b8; padding: 2rem;">No students have submitted this test yet.</p>';
-        } else {
-            submissionsList.innerHTML = testSubmissions.map(sub => `
-                <div class="item-card" onclick="viewSubmission(${sub.id})" style="cursor: pointer; transition: transform 0.2s;">
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <div>
-                            <h4>${sub.studentName}</h4>
-                            <p class="meta">Roll: ${sub.rollNumber} | Submitted: ${sub.dateTaken}</p>
+            if (testSubmissions.length === 0) {
+                submissionsList.innerHTML = '<p style="text-align: center; color: #94a3b8; padding: 2rem;">No students have submitted this test yet.</p>';
+            } else {
+                submissionsList.innerHTML = testSubmissions.map(sub => `
+                    <div class="item-card" onclick="viewSubmission('${sub.firebaseId}')" style="cursor: pointer; transition: transform 0.2s;">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <h4>${sub.studentName}</h4>
+                                <p class="meta">Roll: ${sub.rollNumber} | Submitted: ${sub.dateTaken}</p>
+                            </div>
+                            <div class="status-badge" style="background: ${sub.status === 'Graded' ? '#dcfce7' : '#fef9c3'}; color: ${sub.status === 'Graded' ? '#166534' : '#854d0e'}; padding: 4px 12px; border-radius: 99px; font-size: 0.85rem; font-weight: 600;">
+                                ${sub.status || 'Pending'}
+                            </div>
                         </div>
-                        <div class="status-badge" style="background: ${sub.status === 'Graded' ? '#dcfce7' : '#fef9c3'}; color: ${sub.status === 'Graded' ? '#166534' : '#854d0e'}; padding: 4px 12px; border-radius: 99px; font-size: 0.85rem; font-weight: 600;">
-                            ${sub.status || 'Pending'}
-                        </div>
+                    </div>
+                `).join('');
+            }
+            gradingModal.classList.add('active');
+        });
+    };
+
+    window.viewSubmission = function (submissionFirebaseId) {
+        database.ref('testResults').child(submissionFirebaseId).once('value', (snapshot) => {
+            const submission = snapshot.val();
+            if (!submission) return;
+
+            const test = tests.find(t => t.id == submission.testId);
+
+            // Populate Interface
+            document.getElementById('studentSubmissionsList').style.display = 'none';
+            document.getElementById('gradingInterface').style.display = 'block';
+
+            document.getElementById('gradingStudentName').textContent = submission.studentName;
+            document.getElementById('currentSubmissionId').value = submissionFirebaseId; // Store firebaseId
+            document.getElementById('gradingTotalMarks').textContent = test ? test.totalMarks : '-';
+            document.getElementById('gradingMarks').value = submission.marksObtained || '';
+            document.getElementById('gradingFeedback').value = submission.feedback || 'Good Job';
+
+            // Render Questions and Answers
+            const container = document.getElementById('gradingQuestionsContainer');
+            container.innerHTML = submission.answers.map((ans, index) => `
+                <div class="qa-block" style="margin-bottom: 1.5rem; background: #f8fafc; padding: 1rem; border-radius: 8px;">
+                    <p style="font-weight: 600; color: #334155; margin-bottom: 0.5rem;">Q${index + 1}: ${ans.question}</p>
+                    <div style="background: white; padding: 0.75rem; border: 1px solid #e2e8f0; border-radius: 6px; color: #1e293b;">
+                        ${ans.studentAnswer || '<span style="color: #94a3b8; font-style: italic;">No answer provided</span>'}
                     </div>
                 </div>
             `).join('');
-        }
-
-        gradingModal.classList.add('active');
-    };
-
-    window.viewSubmission = function (submissionId) {
-        const results = JSON.parse(localStorage.getItem('testResults') || '[]');
-        const submission = results.find(r => r.id === submissionId);
-        if (!submission) return;
-
-        const tests = JSON.parse(localStorage.getItem('tests') || '[]');
-        const test = tests.find(t => t.id === submission.testId);
-
-        // Populate Interface
-        document.getElementById('studentSubmissionsList').style.display = 'none';
-        document.getElementById('gradingInterface').style.display = 'block';
-
-        document.getElementById('gradingStudentName').textContent = submission.studentName;
-        document.getElementById('currentSubmissionId').value = submission.id;
-        document.getElementById('gradingTotalMarks').textContent = test.totalMarks;
-        document.getElementById('gradingMarks').value = submission.marksObtained || '';
-        document.getElementById('gradingFeedback').value = submission.feedback || 'Good Job';
-
-        // Render Questions and Answers
-        const container = document.getElementById('gradingQuestionsContainer');
-        container.innerHTML = submission.answers.map((ans, index) => `
-            <div class="qa-block" style="margin-bottom: 1.5rem; background: #f8fafc; padding: 1rem; border-radius: 8px;">
-                <p style="font-weight: 600; color: #334155; margin-bottom: 0.5rem;">Q${index + 1}: ${ans.question}</p>
-                <div style="background: white; padding: 0.75rem; border: 1px solid #e2e8f0; border-radius: 6px; color: #1e293b;">
-                    ${ans.studentAnswer || '<span style="color: #94a3b8; font-style: italic;">No answer provided</span>'}
-                </div>
-            </div>
-        `).join('');
-    };
-
-    window.backToSubmissions = function () {
-        document.getElementById('gradingInterface').style.display = 'none';
-        document.getElementById('studentSubmissionsList').style.display = 'block';
+        });
     };
 
     window.saveGrade = function () {
-        const submissionId = parseInt(document.getElementById('currentSubmissionId').value);
+        const submissionFirebaseId = document.getElementById('currentSubmissionId').value;
         const marks = document.getElementById('gradingMarks').value;
         const feedback = document.getElementById('gradingFeedback').value;
-        const totalMarks = parseInt(document.getElementById('gradingTotalMarks').textContent);
 
         if (!marks) {
             alert('Please enter marks');
             return;
         }
 
-        // Save to localStorage
-        const results = JSON.parse(localStorage.getItem('testResults') || '[]');
-        const index = results.findIndex(r => r.id === submissionId);
-
-        if (index !== -1) {
-            results[index].marksObtained = marks;
-            results[index].feedback = feedback;
-            results[index].status = 'Graded';
-            localStorage.setItem('testResults', JSON.stringify(results));
-
+        database.ref('testResults').child(submissionFirebaseId).update({
+            marksObtained: marks,
+            feedback: feedback,
+            status: 'Graded'
+        }).then(() => {
             alert('Grade saved successfully!');
             backToSubmissions();
-            // Refresh list (re-open to refresh is easiest or call gradeTest again with testId)
-            const testId = results[index].testId;
-            gradeTest(testId);
-        }
+            // We need to refresh the list, we can just get the testId from the previous state
+            // But it's easier to just re-open the list
+        });
     };
 
-    // Close buttons for Assignment Grading Modal
-    document.getElementById('closeAssignmentGradingModal').addEventListener('click', () => {
-        document.getElementById('assignmentGradingModal').style.display = 'none';
-        document.getElementById('assignmentGradingInterface').style.display = 'none';
-        document.getElementById('assignmentSubmissionsList').style.display = 'grid';
-    });
+    window.gradeAssignment = function (assignmentFirebaseId) {
+        const modal = document.getElementById('assignmentGradingModal');
+        const title = document.getElementById('assignmentGradingTitle');
+        const list = document.getElementById('assignmentSubmissionsList');
+        const interface = document.getElementById('assignmentGradingInterface');
 
-    // Make functions global
-    window.gradeTest = gradeTest;
-    window.viewSubmission = viewSubmission;
-    window.saveGrade = saveGrade;
-    window.backToSubmissions = backToSubmissions;
-    window.gradeAssignment = gradeAssignment;
-    window.viewAssignmentSubmission = viewAssignmentSubmission;
-    window.saveAssignmentGrade = saveAssignmentGrade;
-    window.backToAssignmentSubmissions = backToAssignmentSubmissions;
-});
+        const assignment = assignments.find(a => a.firebaseId === assignmentFirebaseId);
+        if (!assignment) return;
 
-// Assignment Grading Logic
+        title.textContent = `Grade Assignment: ${assignment.title}`;
+        interface.style.display = 'none';
+        list.style.display = 'grid';
 
-function gradeAssignment(assignmentId) {
-    const modal = document.getElementById('assignmentGradingModal');
-    const title = document.getElementById('assignmentGradingTitle');
-    const list = document.getElementById('assignmentSubmissionsList');
-    const interface = document.getElementById('assignmentGradingInterface');
+        database.ref('assignmentSubmissions').once('value', (snapshot) => {
+            const submissionsVal = snapshot.val();
+            const submissions = submissionsVal ? Object.keys(submissionsVal).map(id => ({ ...submissionsVal[id], firebaseId: id })) : [];
+            const assignmentSubmissions = submissions.filter(s => s.assignmentId == assignment.id);
 
-    const assignments = JSON.parse(localStorage.getItem('assignments') || '[]');
-    const submissions = JSON.parse(localStorage.getItem('assignmentSubmissions') || '[]');
-    const assignment = assignments.find(a => a.id === assignmentId);
-
-    if (!assignment) return;
-
-    title.textContent = `Grade Assignment: ${assignment.title}`;
-    interface.style.display = 'none';
-    list.style.display = 'grid';
-
-    // Filter submissions for this assignment
-    const assignmentSubmissions = submissions.filter(s => s.assignmentId === assignmentId);
-
-    if (assignmentSubmissions.length === 0) {
-        list.innerHTML = '<p class="no-data" style="color: #94a3b8; text-align: center; padding: 2rem;">No submissions found for this assignment.</p>';
-    } else {
-        list.innerHTML = assignmentSubmissions.map(s => `
-            <div class="item-card" onclick="viewAssignmentSubmission(${s.id})" style="cursor: pointer; transition: transform 0.2s;">
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <div>
-                        <h4>${s.studentName}</h4>
-                        <p class="meta">Roll: ${s.rollNumber} | Submitted: ${s.dateSubmitted}</p>
+            if (assignmentSubmissions.length === 0) {
+                list.innerHTML = '<p class="no-data" style="color: #94a3b8; text-align: center; padding: 2rem;">No submissions found for this assignment.</p>';
+            } else {
+                list.innerHTML = assignmentSubmissions.map(s => `
+                    <div class="item-card" onclick="viewAssignmentSubmission('${s.firebaseId}')" style="cursor: pointer; transition: transform 0.2s;">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <h4>${s.studentName}</h4>
+                                <p class="meta">Roll: ${s.rollNumber} | Submitted: ${s.dateSubmitted}</p>
+                            </div>
+                            <div>
+                                <span class="status-badge" style="background: ${s.status === 'Graded' ? '#dcfce7' : '#fef9c3'}; color: ${s.status === 'Graded' ? '#166534' : '#854d0e'}; padding: 4px 12px; border-radius: 99px; font-size: 0.85rem; font-weight: 600;">${s.status}</span>
+                                ${s.status === 'Graded' ? `<div style="font-weight: bold; margin-top: 5px; text-align: right; color: #10b981;">Score: ${s.marksObtained}</div>` : ''}
+                            </div>
+                        </div>
                     </div>
-                    <div>
-                        <span class="status-badge" style="background: ${s.status === 'Graded' ? '#dcfce7' : '#fef9c3'}; color: ${s.status === 'Graded' ? '#166534' : '#854d0e'}; padding: 4px 12px; border-radius: 99px; font-size: 0.85rem; font-weight: 600;">${s.status}</span>
-                        ${s.status === 'Graded' ? `<div style="font-weight: bold; margin-top: 5px; text-align: right; color: #10b981;">Score: ${s.marksObtained}</div>` : ''}
-                    </div>
-                </div>
-            </div>
-        `).join('');
-    }
-
-    modal.style.display = 'block';
-}
-
-function viewAssignmentSubmission(submissionId) {
-    const list = document.getElementById('assignmentSubmissionsList');
-    const interface = document.getElementById('assignmentGradingInterface');
-
-    // Elements to populate
-    const studentNameEl = document.getElementById('agStudentName');
-    const fileNameEl = document.getElementById('fileNameDisplay');
-    const downloadBtn = document.getElementById('downloadFileBtn');
-    const totalMarksEl = document.getElementById('agTotalMarks');
-    const marksInput = document.getElementById('agMarks');
-    const feedbackInput = document.getElementById('agFeedback');
-    const submissionIdInput = document.getElementById('currentAgSubmissionId');
-
-    const submissions = JSON.parse(localStorage.getItem('assignmentSubmissions') || '[]');
-    const assignments = JSON.parse(localStorage.getItem('assignments') || '[]');
-    const submission = submissions.find(s => s.id === submissionId);
-
-    if (!submission) return;
-
-    const assignment = assignments.find(a => a.id === submission.assignmentId);
-
-    list.style.display = 'none';
-    interface.style.display = 'block';
-
-    studentNameEl.textContent = `${submission.studentName} (${submission.rollNumber})`;
-    fileNameEl.textContent = submission.fileName || 'No filename';
-    totalMarksEl.textContent = assignment ? assignment.marks : '-';
-    submissionIdInput.value = submission.id;
-
-    // Setup Download Link
-    if (submission.fileData) {
-        downloadBtn.href = submission.fileData;
-        downloadBtn.download = submission.fileName || 'assignment_submission';
-        downloadBtn.style.display = 'inline-block';
-    } else {
-        downloadBtn.style.display = 'none';
-        fileNameEl.textContent = 'No file attached';
-    }
-
-    if (submission.status === 'Graded') {
-        marksInput.value = submission.marksObtained;
-        feedbackInput.value = submission.feedback;
-    } else {
-        marksInput.value = '';
-        feedbackInput.value = '';
-    }
-}
-
-function saveAssignmentGrade() {
-    const submissionId = parseInt(document.getElementById('currentAgSubmissionId').value);
-    const marks = document.getElementById('agMarks').value;
-    const feedback = document.getElementById('agFeedback').value;
-
-    if (!marks) {
-        alert('Please enter marks.');
-        return;
-    }
-
-    const submissions = JSON.parse(localStorage.getItem('assignmentSubmissions') || '[]');
-    const submissionIndex = submissions.findIndex(s => s.id === submissionId);
-
-    if (submissionIndex !== -1) {
-        submissions[submissionIndex].marksObtained = marks;
-        submissions[submissionIndex].feedback = feedback;
-        submissions[submissionIndex].status = 'Graded';
-
-        localStorage.setItem('assignmentSubmissions', JSON.stringify(submissions));
-
-        alert('Grade saved successfully!');
-        backToAssignmentSubmissions();
-
-        // Refresh the list view by calling gradeAssignment again with the assignment ID
-        // We need to look up the assignment ID again
-        const assignmentId = submissions[submissionIndex].assignmentId;
-        gradeAssignment(assignmentId);
-    }
-}
-
-function backToAssignmentSubmissions() {
-    document.getElementById('assignmentGradingInterface').style.display = 'none';
-    document.getElementById('assignmentSubmissionsList').style.display = 'grid';
-}
-
-// Resources logic
-function initResources(resources) {
-    if (document.getElementById('resourceForm')) {
-        document.getElementById('resourceForm').addEventListener('submit', (e) => {
-            e.preventDefault();
-            const title = document.getElementById('resource-title').value;
-            const type = document.getElementById('resource-type').value;
-            const link = document.getElementById('resource-link').value;
-
-            const resource = {
-                id: Date.now(),
-                title,
-                type,
-                link,
-                date: new Date().toLocaleDateString()
-            };
-
-            resources.unshift(resource);
-            localStorage.setItem('resources', JSON.stringify(resources));
-
-            e.target.reset();
-            displayResources(resources);
-            alert('Resource added successfully!');
+                `).join('');
+            }
+            modal.style.display = 'block';
         });
-    }
-}
+    };
 
-function displayResources(resources) {
-    const list = document.getElementById('resourcesList');
-    if (!list) return;
+    window.viewAssignmentSubmission = function (submissionFirebaseId) {
+        const list = document.getElementById('assignmentSubmissionsList');
+        const interface = document.getElementById('assignmentGradingInterface');
 
-    const container = document.createElement('div');
-    container.className = 'resources-grid';
-    container.style.display = 'grid';
-    container.style.gridTemplateColumns = 'repeat(auto-fill, minmax(250px, 1fr))';
-    container.style.gap = '1rem';
-    container.style.marginTop = '1rem';
+        database.ref('assignmentSubmissions').child(submissionFirebaseId).once('value', (snapshot) => {
+            const submission = snapshot.val();
+            if (!submission) return;
 
-    if (resources.length === 0) {
-        list.innerHTML = '<h3>Current Resources</h3><p style="color: #94a3b8;">No resources shared yet.</p>';
-        return;
-    }
+            const assignment = assignments.find(a => a.id == submission.assignmentId);
 
-    list.innerHTML = '<h3>Current Resources</h3>';
-    resources.forEach(res => {
-        const card = document.createElement('div');
-        card.className = 'resource-card';
-        card.style.background = 'rgba(255,255,255,0.03)';
-        card.style.padding = '1rem';
-        card.style.borderRadius = '12px';
-        card.style.border = '1px solid var(--glass-border)';
-        card.style.position = 'relative';
+            list.style.display = 'none';
+            interface.style.display = 'block';
 
-        card.innerHTML = `
-            <span style="position: absolute; top: 0.5rem; right: 0.5rem; font-size: 0.8rem; background: var(--primary-color); padding: 2px 8px; border-radius: 10px;">${res.type}</span>
-            <h4 style="margin-bottom: 0.5rem;">${res.title}</h4>
-            <p style="font-size: 0.8rem; color: #94a3b8; margin-bottom: 1rem;">Added on ${res.date}</p>
-            <div style="display: flex; gap: 0.5rem;">
-                <a href="${res.link}" target="_blank" class="btn-primary" style="padding: 5px 15px; font-size: 0.85rem; text-decoration: none;">View</a>
-                <button class="btn-text-only delete-resource" data-id="${res.id}" style="padding: 5px 15px; font-size: 0.85rem; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2); color: #ef4444; border-radius: 8px;">Delete</button>
-            </div>
-        `;
-        container.appendChild(card);
-    });
-    list.appendChild(container);
+            document.getElementById('agStudentName').textContent = `${submission.studentName} (${submission.rollNumber})`;
+            document.getElementById('fileNameDisplay').textContent = submission.fileName || 'No filename';
+            document.getElementById('agTotalMarks').textContent = assignment ? assignment.marks : '-';
+            document.getElementById('currentAgSubmissionId').value = submissionFirebaseId;
 
-    // Delete handlers
-    document.querySelectorAll('.delete-resource').forEach(btn => {
-        btn.addEventListener('click', () => {
-            const id = parseInt(btn.getAttribute('data-id'));
-            if (confirm('Delete this resource?')) {
-                const idx = resources.findIndex(r => r.id === id);
-                resources.splice(idx, 1);
-                localStorage.setItem('resources', JSON.stringify(resources));
-                displayResources(resources);
+            const downloadBtn = document.getElementById('downloadFileBtn');
+            if (submission.fileData) {
+                downloadBtn.href = submission.fileData;
+                downloadBtn.download = submission.fileName || 'assignment_submission';
+                downloadBtn.style.display = 'inline-block';
+            } else {
+                downloadBtn.style.display = 'none';
+            }
+
+            if (submission.status === 'Graded') {
+                document.getElementById('agMarks').value = submission.marksObtained;
+                document.getElementById('agFeedback').value = submission.feedback;
+            } else {
+                document.getElementById('agMarks').value = '';
+                document.getElementById('agFeedback').value = '';
             }
         });
-    });
-}
+    };
 
-function displayLeaderboard(quizResults, adjustments = {}) {
-    const tbody = document.getElementById('globalLeaderboardBody');
-    if (!tbody) return;
+    window.saveAssignmentGrade = function () {
+        const submissionFirebaseId = document.getElementById('currentAgSubmissionId').value;
+        const marks = document.getElementById('agMarks').value;
+        const feedback = document.getElementById('agFeedback').value;
 
-    // Calculate scores per student
-    const leaderboardData = {};
+        if (!marks) {
+            alert('Please enter marks.');
+            return;
+        }
 
-    // First, process all known students to include adjustments even without quizzes
-    const studentsArr = JSON.parse(localStorage.getItem('students') || '[]');
-    studentsArr.forEach(student => {
-        const email = student.email;
-        leaderboardData[email] = {
-            name: student.name,
-            quizPoints: 0,
-            adjustment: adjustments[email] || 0,
-            totalPoints: adjustments[email] || 0,
-            quizzes: 0
-        };
-    });
+        database.ref('assignmentSubmissions').child(submissionFirebaseId).update({
+            marksObtained: marks,
+            feedback: feedback,
+            status: 'Graded'
+        }).then(() => {
+            alert('Grade saved successfully!');
+            backToAssignmentSubmissions();
+        });
+    };
 
-    // Then, add quiz results
-    quizResults.forEach(result => {
-        const email = result.email;
-        if (!leaderboardData[email]) {
+    function initResources() {
+        const form = document.getElementById('resourceForm');
+        if (form && !form.dataset.initialized) {
+            form.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const title = document.getElementById('resource-title').value;
+                const type = document.getElementById('resource-type').value;
+                const link = document.getElementById('resource-link').value;
+
+                const resource = {
+                    id: Date.now(),
+                    title,
+                    type,
+                    link,
+                    date: new Date().toLocaleDateString()
+                };
+
+                database.ref('resources').push(resource);
+                e.target.reset();
+                alert('Resource added successfully!');
+            });
+            form.dataset.initialized = "true";
+        }
+    }
+
+    function displayResources() {
+        const list = document.getElementById('resourcesList');
+        if (!list) return;
+
+        list.innerHTML = '<h3>Current Resources</h3>';
+        const container = document.createElement('div');
+        container.className = 'resources-grid';
+        container.style.display = 'grid';
+        container.style.gridTemplateColumns = 'repeat(auto-fill, minmax(250px, 1fr))';
+        container.style.gap = '1rem';
+        container.style.marginTop = '1rem';
+
+        if (resources.length === 0) {
+            list.innerHTML += '<p style="color: #94a3b8;">No resources shared yet.</p>';
+            return;
+        }
+
+        resources.forEach(res => {
+            const card = document.createElement('div');
+            card.className = 'resource-card';
+            card.style.background = 'rgba(255,255,255,0.03)';
+            card.style.padding = '1rem';
+            card.style.borderRadius = '12px';
+            card.style.border = '1px solid var(--glass-border)';
+            card.style.position = 'relative';
+
+            card.innerHTML = `
+                <span style="position: absolute; top: 0.5rem; right: 0.5rem; font-size: 0.8rem; background: var(--primary-color); padding: 2px 8px; border-radius: 10px;">${res.type}</span>
+                <h4 style="margin-bottom: 0.5rem;">${res.title}</h4>
+                <p style="font-size: 0.8rem; color: #94a3b8; margin-bottom: 1rem;">Added on ${res.date}</p>
+                <div style="display: flex; gap: 0.5rem;">
+                    <a href="${res.link}" target="_blank" class="btn-primary" style="padding: 5px 15px; font-size: 0.85rem; text-decoration: none;">View</a>
+                    <button class="btn-text-only" onclick="deleteResource('${res.firebaseId}')" style="padding: 5px 15px; font-size: 0.85rem; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2); color: #ef4444; border-radius: 8px;">Delete</button>
+                </div>
+            `;
+            container.appendChild(card);
+        });
+        list.appendChild(container);
+    }
+
+    function displayLeaderboard(quizResults, adjustments = {}) {
+        const tbody = document.getElementById('globalLeaderboardBody');
+        if (!tbody) return;
+
+        const leaderboardData = {};
+
+        students.forEach(student => {
+            const email = student.email;
             leaderboardData[email] = {
-                name: result.studentName || email.split('@')[0],
+                name: student.name,
                 quizPoints: 0,
                 adjustment: adjustments[email] || 0,
                 totalPoints: adjustments[email] || 0,
                 quizzes: 0
             };
+        });
+
+        quizResults.forEach(result => {
+            const email = result.email;
+            if (!leaderboardData[email]) {
+                leaderboardData[email] = {
+                    name: result.studentName || email.split('@')[0],
+                    quizPoints: 0,
+                    adjustment: adjustments[email] || 0,
+                    totalPoints: adjustments[email] || 0,
+                    quizzes: 0
+                };
+            }
+            leaderboardData[email].quizPoints += parseInt(result.score);
+            leaderboardData[email].totalPoints += parseInt(result.score);
+            leaderboardData[email].quizzes += 1;
+        });
+
+        const sortedScores = Object.values(leaderboardData).sort((a, b) => b.totalPoints - a.totalPoints);
+
+        if (sortedScores.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 2rem; color: #94a3b8;">No student records found.</td></tr>';
+            return;
         }
-        leaderboardData[email].quizPoints += parseInt(result.score);
-        leaderboardData[email].totalPoints += parseInt(result.score);
-        leaderboardData[email].quizzes += 1;
-    });
 
-    // Convert to array and sort
-    const sortedScores = Object.values(leaderboardData).sort((a, b) => b.totalPoints - a.totalPoints);
-
-    if (sortedScores.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 2rem; color: #94a3b8;">No student records found.</td></tr>';
-        return;
+        tbody.innerHTML = sortedScores.map((student, index) => `
+            <tr>
+                <td><span style="display: flex; align-items: center; justify-content: center; width: 30px; height: 30px; background: ${index === 0 ? '#ffd700' : index === 1 ? '#c0c0c0' : index === 2 ? '#cd7f32' : 'rgba(255,255,255,0.05)'}; color: ${index < 3 ? '#000' : '#fff'}; border-radius: 50%; font-weight: bold;">${index + 1}</span></td>
+                <td>${student.name}</td>
+                <td style="color: #94a3b8;">${student.quizPoints} pts</td>
+                <td style="color: ${student.adjustment >= 0 ? '#10b981' : '#ef4444'};">${student.adjustment >= 0 ? '+' : ''}${student.adjustment}</td>
+                <td style="font-weight: 600; color: var(--primary-color);">${student.totalPoints} pts</td>
+                <td>${student.quizzes}</td>
+            </tr>
+        `).join('');
     }
 
-    tbody.innerHTML = sortedScores.map((student, index) => `
-        <tr>
-            <td><span style="display: flex; align-items: center; justify-content: center; width: 30px; height: 30px; background: ${index === 0 ? '#ffd700' : index === 1 ? '#c0c0c0' : index === 2 ? '#cd7f32' : 'rgba(255,255,255,0.05)'}; color: ${index < 3 ? '#000' : '#fff'}; border-radius: 50%; font-weight: bold;">${index + 1}</span></td>
-            <td>${student.name}</td>
-            <td style="color: #94a3b8;">${student.quizPoints} pts</td>
-            <td style="color: ${student.adjustment >= 0 ? '#10b981' : '#ef4444'};">${student.adjustment >= 0 ? '+' : ''}${student.adjustment}</td>
-            <td style="font-weight: 600; color: var(--primary-color);">${student.totalPoints} pts</td>
-            <td>${student.quizzes}</td>
-        </tr>
-    `).join('');
-}
+    function initLeaderboardControl() {
+        const form = document.getElementById('leaderboardAdjustmentForm');
+        if (form && !form.dataset.initialized) {
+            form.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const email = document.getElementById('adj-email').value;
+                const points = parseInt(document.getElementById('adj-points').value);
 
-function initLeaderboardControl(quizResults, adjustments) {
-    const form = document.getElementById('leaderboardAdjustmentForm');
-    if (!form) return;
+                if (!email || isNaN(points)) return;
 
-    form.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const email = document.getElementById('adj-email').value;
-        const points = parseInt(document.getElementById('adj-points').value);
+                const newTotal = (adjustments[email] || 0) + points;
+                database.ref('leaderboardAdjustments').child(email.replace(/\./g, ',')).set(newTotal);
 
-        if (!email || isNaN(points)) return;
-
-        adjustments[email] = (adjustments[email] || 0) + points;
-        localStorage.setItem('leaderboardAdjustments', JSON.stringify(adjustments));
-
-        displayLeaderboard(quizResults, adjustments);
-        e.target.reset();
-        alert(`Points updated for ${email}`);
-    });
-}
+                e.target.reset();
+                alert(`Points updated for ${email}`);
+            });
+            form.dataset.initialized = "true";
+        }
+    }
+});

@@ -114,27 +114,29 @@ document.addEventListener('DOMContentLoaded', () => {
         const formData = new FormData(signupForm);
         const data = Object.fromEntries(formData);
 
-        // Get existing students
-        const students = JSON.parse(localStorage.getItem('students') || '[]');
+        // Fetch existing students from Firebase to check for duplicates
+        database.ref('students').once('value', (snapshot) => {
+            const val = snapshot.val();
+            const students = val ? Object.values(val) : [];
 
-        // Check if email or roll number already exists
-        if (students.some(s => s.email === data.email || s.rollNumber === data.rollNumber)) {
-            alert('Student with this Email or Roll Number already exists!');
-            return;
-        }
+            // Check if email or roll number already exists
+            if (students.some(s => s.email === data.email || s.rollNumber === data.rollNumber)) {
+                alert('Student with this Email or Roll Number already exists!');
+                return;
+            }
 
-        // Add new student
-        students.push(data);
-        localStorage.setItem('students', JSON.stringify(students));
+            // Add new student to Firebase
+            database.ref('students').push(data).then(() => {
+                // Set current user session (keeping this in localStorage for persistence across pages)
+                localStorage.setItem('currentUser', JSON.stringify(data));
 
-        // Set current user session
-        localStorage.setItem('currentUser', JSON.stringify(data));
+                console.log('Sign Up Data:', data);
+                alert(`Welcome ${data.name}! Your account has been created.\nRedirecting to dashboard...`);
 
-        console.log('Sign Up Data:', data);
-        alert(`Welcome ${data.name}! Your account has been created.\nRedirecting to dashboard...`);
-
-        // Redirect to dashboard
-        window.location.href = 'dashboard.html';
+                // Redirect to dashboard
+                window.location.href = 'dashboard.html';
+            });
+        });
     });
 
     loginForm.addEventListener('submit', (e) => {
@@ -142,23 +144,26 @@ document.addEventListener('DOMContentLoaded', () => {
         const formData = new FormData(loginForm);
         const data = Object.fromEntries(formData);
 
-        // Get existing students
-        const students = JSON.parse(localStorage.getItem('students') || '[]');
+        // Fetch students from Firebase
+        database.ref('students').once('value', (snapshot) => {
+            const val = snapshot.val();
+            const students = val ? Object.values(val) : [];
 
-        // Find student
-        const student = students.find(s => s.rollNumber === data.rollNumber && s.name === data.name); // Simple validation for now
+            // Find student
+            const student = students.find(s => s.rollNumber === data.rollNumber && s.name === data.name);
 
-        if (student) {
-            // Set current user session
-            localStorage.setItem('currentUser', JSON.stringify(student));
+            if (student) {
+                // Set current user session
+                localStorage.setItem('currentUser', JSON.stringify(student));
 
-            console.log('Login Data:', data);
-            alert(`Welcome back, ${student.name}!\nLogging in...`);
+                console.log('Login Data:', data);
+                alert(`Welcome back, ${student.name}!\nLogging in...`);
 
-            window.location.href = 'dashboard.html';
-        } else {
-            alert('Invalid Name or Roll Number! Please try again or Sign Up.');
-        }
+                window.location.href = 'dashboard.html';
+            } else {
+                alert('Invalid Name or Roll Number! Please try again or Sign Up.');
+            }
+        });
     });
 
     // FAQ Accordion Logic

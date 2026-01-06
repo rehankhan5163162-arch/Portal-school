@@ -89,35 +89,83 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Initial load of data
-    loadDashboardData();
+    // Initialize data placeholders
+    let announcements = [];
+    let assignments = [];
+    let quizzes = [];
+    let tests = [];
+    let syllabus = [];
+    let attendance = [];
+    let resources = [];
+    let quizResults = [];
+    let testResults = [];
+    let assignmentSubmissions = [];
+    let adjustments = {};
+    let students = [];
 
-    function loadDashboardData() {
-        displayAnnouncements();
-        displayAssignments();
-        displayQuizzes();
-        displayTests();
-        displaySyllabus();
-        displayAttendance();
-        displayResources();
-        displayLeaderboard();
+    // REAL-TIME DATABASE LISTENERS
+    function setupFirebaseListeners() {
+        const refs = {
+            'announcements': (data) => { announcements = data; displayAnnouncements(); },
+            'assignments': (data) => { assignments = data; displayAssignments(); },
+            'quizzes': (data) => { quizzes = data; displayQuizzes(); },
+            'tests': (data) => { tests = data; displayTests(); },
+            'syllabus': (data) => { syllabus = data; displaySyllabus(); },
+            'attendance': (data) => {
+                attendance = data.filter(a => a.rollNumber === currentUser.rollNumber);
+                displayAttendance();
+            },
+            'resources': (data) => { resources = data; displayResources(); },
+            'quizResults': (data) => {
+                quizResults = data;
+                displayLeaderboard();
+                updateStats();
+            },
+            'testResults': (data) => {
+                testResults = data;
+                displayTests(); // Refresh tests to show score if graded
+            },
+            'assignmentSubmissions': (data) => {
+                assignmentSubmissions = data;
+                displayAssignments(); // Refresh assignments as status might change
+                updateStats();
+            },
+            'leaderboardAdjustments': (data) => { adjustments = data || {}; displayLeaderboard(); },
+            'students': (data) => { students = data; displayLeaderboard(); }
+        };
+
+        Object.keys(refs).forEach(key => {
+            database.ref(key).on('value', (snapshot) => {
+                const val = snapshot.val();
+                let data = [];
+                if (val) {
+                    if (key === 'leaderboardAdjustments') {
+                        data = val;
+                    } else {
+                        data = Object.keys(val).map(id => ({ ...val[id], firebaseId: id }));
+                    }
+                }
+                refs[key](data);
+            });
+        });
+
         displayProfile();
-        updateStats();
     }
+
+    // Listeners setup moved to end of file to prevent blocking
 
     function displayAnnouncements() {
         const list = document.getElementById('announcementsList');
-        const announcements = JSON.parse(localStorage.getItem('announcements') || '[]');
 
         if (announcements.length === 0) {
             list.innerHTML = '<p style="color: #94a3b8; text-align: center; grid-column: 1/-1;">No announcements yet.</p>';
             return;
         }
 
-        // Sort by date (newest first)
-        announcements.sort((a, b) => new Date(b.date) - new Date(a.date));
+        // Sort by id (newest first assuming id is timestamp) or use date
+        const sorted = [...announcements].sort((a, b) => (b.id || 0) - (a.id || 0));
 
-        list.innerHTML = announcements.map(a => `
+        list.innerHTML = sorted.map(a => `
             <div class="announcement-card" style="background: white; padding: 1.5rem; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); margin-bottom: 1rem;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
                     <h3 style="color: #1e293b; margin: 0;">${a.title}</h3>
@@ -130,8 +178,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function displayAssignments() {
         const list = document.getElementById('assignmentsList');
-        const assignments = JSON.parse(localStorage.getItem('assignments') || '[]');
-        const submissions = JSON.parse(localStorage.getItem('assignmentSubmissions') || '[]');
 
         if (assignments.length === 0) {
             list.innerHTML = '<p style="color: #94a3b8; text-align: center; grid-column: 1/-1;">No assignments assigned yet.</p>';
@@ -139,7 +185,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         list.innerHTML = assignments.map(a => {
-            const submission = submissions.find(s => s.assignmentId === a.id && s.rollNumber === currentUser.rollNumber);
+            const submission = assignmentSubmissions.find(s => s.assignmentId == a.id && s.rollNumber === currentUser.rollNumber);
             let statusHtml = '';
 
             if (submission) {
@@ -171,26 +217,34 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function displayQuizzes() {
         const list = document.getElementById('quizList');
-        const quizzes = JSON.parse(localStorage.getItem('quizzes') || '[]');
 
         if (quizzes.length === 0) {
             list.innerHTML = '<p style="color: #94a3b8; text-align: center; grid-column: 1/-1;">No quizzes available.</p>';
             return;
         }
 
-        list.innerHTML = quizzes.map(q => `
-            <div class="quiz-card">
-                <h3>${q.title}</h3>
-                <p>Questions: ${q.questions.length} | Duration: ${q.duration} minutes</p>
-                <button class="btn-start" onclick="startQuiz(${q.id})">Start Quiz</button>
-            </div>
-        `).join('');
+        list.innerHTML = quizzes.map(q => {
+            const result = quizResults.find(r => r.quizId == q.id && r.rollNumber === currentUser.rollNumber);
+            let actionHtml = '';
+
+            if (result) {
+                actionHtml = `<div style="margin-top: 1rem; font-weight: bold; color: #10b981;">Score: ${result.score} / ${result.total}</div>`;
+            } else {
+                actionHtml = `<button class="btn-start" onclick="startQuiz(${q.id})" style="margin-top: 1rem;">Start Quiz</button>`;
+            }
+
+            return `
+                <div class="quiz-card">
+                    <h3>${q.title}</h3>
+                    <p>Questions: ${q.questions.length} | Duration: ${q.duration} minutes</p>
+                    ${actionHtml}
+                </div>
+            `;
+        }).join('');
     }
 
     function displayTests() {
         const list = document.getElementById('testList');
-        const tests = JSON.parse(localStorage.getItem('tests') || '[]');
-        const results = JSON.parse(localStorage.getItem('testResults') || '[]');
 
         if (tests.length === 0) {
             list.innerHTML = '<p style="color: #94a3b8; text-align: center; grid-column: 1/-1;">No tests scheduled.</p>';
@@ -199,7 +253,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         list.innerHTML = tests.map(t => {
             // Check if student already took this test
-            const submission = results.find(r => r.testId === t.id && r.rollNumber === currentUser.rollNumber);
+            const submission = testResults.find(r => r.testId == t.id && r.rollNumber === currentUser.rollNumber);
             let actionHtml = '';
 
             if (submission) {
@@ -230,7 +284,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function displaySyllabus() {
         const list = document.getElementById('syllabusList');
-        const syllabus = JSON.parse(localStorage.getItem('syllabus') || '[]');
 
         if (syllabus.length === 0) {
             list.innerHTML = '<p style="color: #94a3b8; text-align: center; grid-column: 1/-1;">No syllabus uploaded.</p>';
@@ -249,14 +302,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function displayAttendance() {
         const list = document.getElementById('attendanceList');
-        const allAttendance = JSON.parse(localStorage.getItem('attendance') || '[]');
-
-        // Filter attendance for current student
-        const studentAttendance = allAttendance.filter(a => a.rollNumber === currentUser.rollNumber);
 
         // Group by Month
         const attendanceByMonth = {};
-        studentAttendance.forEach(record => {
+        attendance.forEach(record => {
             const date = new Date(record.date);
             const monthKey = `${date.getFullYear()}-${date.getMonth() + 1}`; // YYYY-M
             if (!attendanceByMonth[monthKey]) {
@@ -345,19 +394,27 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function updateStats() {
-        const assignments = JSON.parse(localStorage.getItem('assignments') || '[]');
-        const quizzes = JSON.parse(localStorage.getItem('quizzes') || '[]');
-        const tests = JSON.parse(localStorage.getItem('tests') || '[]');
+        // Pending assignments (not submitted)
+        const submittedAssignIds = assignmentSubmissions
+            .filter(s => s.rollNumber === currentUser.rollNumber)
+            .map(s => s.assignmentId);
 
-        // Update dashboard stats cards
-        // Note: In a real app, we'd filter these for the specific student if they were assigned individually
-        // For now, we assume all assignments/quizzes/tests are for everyone
+        const pendingCount = assignments.filter(a => !submittedAssignIds.includes(a.id)).length;
+
+        // Upcoming quizzes (not taken)
+        const takenQuizIds = quizResults
+            .filter(r => r.rollNumber === currentUser.rollNumber)
+            .map(r => r.quizId);
+        const upcomingQuizzes = quizzes.filter(q => !takenQuizIds.includes(q.id)).length;
+
+        // Current week tests (simple count for now)
+        const scheduledTests = tests.length;
 
         const statsCards = document.querySelectorAll('.stat-card h3');
         if (statsCards.length >= 3) {
-            statsCards[0].textContent = assignments.length; // Pending Assignments
-            statsCards[1].textContent = quizzes.length;     // Upcoming Quizzes
-            statsCards[2].textContent = tests.length;       // Tests This Week
+            statsCards[0].textContent = pendingCount; // Pending Assignments
+            statsCards[1].textContent = upcomingQuizzes; // Upcoming Quizzes
+            statsCards[2].textContent = scheduledTests;  // Tests Scheduled
         }
     }
 
@@ -367,8 +424,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentQuizId = null;
 
     window.startQuiz = function (quizId) {
-        const quizzes = JSON.parse(localStorage.getItem('quizzes') || '[]');
-        const quiz = quizzes.find(q => q.id === quizId);
+        const quiz = quizzes.find(q => q.id == quizId);
 
         if (!quiz) return;
 
@@ -457,23 +513,20 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        // Save Result
-        const currentUser = JSON.parse(localStorage.getItem('currentUser'));
-        const results = JSON.parse(localStorage.getItem('quizResults') || '[]');
-
-        results.push({
+        const result = {
             id: Date.now(),
             studentName: currentUser.name,
             rollNumber: currentUser.rollNumber,
+            email: currentUser.email,
             quizId: currentQuizId,
             quizTitle: quiz.title,
             score: score,
             total: total,
             date: new Date().toLocaleDateString(),
             time: new Date().toLocaleTimeString()
-        });
+        };
 
-        localStorage.setItem('quizResults', JSON.stringify(results));
+        database.ref('quizResults').push(result);
 
         // Show Results in Modal
         const questionsContainer = document.getElementById('quizQuestions');
@@ -512,8 +565,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentTest = null;
 
     window.startTest = function (testId) {
-        const tests = JSON.parse(localStorage.getItem('tests') || '[]');
-        currentTest = tests.find(t => t.id === testId);
+        currentTest = tests.find(t => t.id == testId);
 
         if (!currentTest) return;
 
@@ -620,23 +672,21 @@ document.addEventListener('DOMContentLoaded', () => {
             testAnswers[currentQuestionIndex].studentAnswer = currentInput;
         }
 
-        const currentUser = JSON.parse(localStorage.getItem('currentUser'));
-        const results = JSON.parse(localStorage.getItem('testResults') || '[]');
-
-        results.push({
+        const result = {
             id: Date.now(),
             testId: currentTestId,
             testTitle: currentTest.title,
             studentName: currentUser.name,
             rollNumber: currentUser.rollNumber,
+            email: currentUser.email,
             answers: testAnswers,
             marksObtained: null,
             feedback: null,
             status: 'Pending',
             dateTaken: new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString()
-        });
+        };
 
-        localStorage.setItem('testResults', JSON.stringify(results));
+        database.ref('testResults').push(result);
 
         // Reset UI
         document.getElementById('testModal').classList.remove('active');
@@ -660,8 +710,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     window.openAssignmentModal = function (id) {
-        const assignments = JSON.parse(localStorage.getItem('assignments') || '[]');
-        const assignment = assignments.find(a => a.id === id);
+        const assignment = assignments.find(a => a.id == id);
 
         if (!assignment) return;
 
@@ -706,6 +755,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 assignmentId: currentAssignmentId,
                 studentName: currentUser.name,
                 rollNumber: currentUser.rollNumber,
+                email: currentUser.email,
                 fileData: base64File,
                 fileName: file.name,
                 fileType: file.type,
@@ -715,9 +765,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 feedback: ''
             };
 
-            const submissions = JSON.parse(localStorage.getItem('assignmentSubmissions') || '[]');
-            submissions.push(submission);
-            localStorage.setItem('assignmentSubmissions', JSON.stringify(submissions));
+            database.ref('assignmentSubmissions').push(submission);
 
             // Show success
             document.getElementById('uploadSection').style.display = 'none';
@@ -735,7 +783,6 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     function displayResources() {
-        const resources = JSON.parse(localStorage.getItem('resources') || '[]');
         const list = document.getElementById('studentResourcesList');
         if (!list) return;
 
@@ -758,9 +805,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function displayLeaderboard() {
-        const quizResults = JSON.parse(localStorage.getItem('quizResults') || '[]');
-        const adjustments = JSON.parse(localStorage.getItem('leaderboardAdjustments') || '{}');
-        const students = JSON.parse(localStorage.getItem('students') || '[]');
         const tbody = document.getElementById('studentLeaderboardBody');
         if (!tbody) return;
 
@@ -771,7 +815,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const email = student.email;
             leaderboardData[email] = {
                 name: student.name,
-                points: adjustments[email] || 0,
+                points: adjustments[email.replace(/\./g, ',')] || 0,
                 quizzes: 0
             };
         });
@@ -779,10 +823,12 @@ document.addEventListener('DOMContentLoaded', () => {
         // Add quiz results
         quizResults.forEach(result => {
             const email = result.email;
+            if (!email) return;
+
             if (!leaderboardData[email]) {
                 leaderboardData[email] = {
                     name: result.studentName || email.split('@')[0],
-                    points: adjustments[email] || 0,
+                    points: adjustments[email.replace(/\./g, ',')] || 0,
                     quizzes: 0
                 };
             }
@@ -817,5 +863,27 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('profileName').textContent = currentUser.name || 'N/A';
         document.getElementById('profileEmail').textContent = currentUser.email || 'N/A';
         document.getElementById('profileRoll').textContent = currentUser.rollNumber || 'N/A';
+    }
+
+    // Safe Initialization
+    try {
+        if (typeof database !== 'undefined') {
+            setupFirebaseListeners();
+        } else {
+            console.warn("Firebase database not initialized. UI running in offline/empty mode.");
+            // Render empty states
+            displayAnnouncements();
+            displayAssignments();
+            displayQuizzes();
+            displayTests();
+            displaySyllabus();
+            displayAttendance();
+            displayResources();
+            displayLeaderboard();
+            displayProfile();
+            updateStats();
+        }
+    } catch (error) {
+        console.error("Error initializing dashboard data:", error);
     }
 });

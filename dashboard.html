@@ -300,6 +300,30 @@
         </div>
     </div>
 
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+
+    <script>
+        // Your web app's Firebase configuration
+        // IMPORTANT: PASTE YOUR CONFIG FROM FIREBASE CONSOLE HERE
+        const firebaseConfig = {
+            apiKey: "AIzaSyDh2AlY0iEHsQCFdk-t6bKjvFg6tkCFqJw",
+            authDomain: "school-posting.firebaseapp.com",
+            databaseURL: "https://school-posting-default-rtdb.firebaseio.com/",
+            projectId: "school-posting",
+            storageBucket: "school-posting.firebasestorage.app",
+            messagingSenderId: "622555177064",
+            appId: "1:622555177064:web:8d3f6c7fd4fd824d049bdd"
+        };
+
+        // Initialize Firebase
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        const database = firebase.database();
+    </script>
+
     <script src="dashboard.js"></script>
 </body>
 
