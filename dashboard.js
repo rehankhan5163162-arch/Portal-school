@@ -158,10 +158,16 @@ document.addEventListener('DOMContentLoaded', () => {
         const list = document.getElementById('announcementsList');
 
         // Filter by class
-        const filtered = announcements.filter(a => !a.targetClass || a.targetClass === 'All' || a.targetClass === currentUser.class);
+        const userClass = currentUser.class ? String(currentUser.class) : null;
+
+        const filtered = announcements.filter(a =>
+            !a.targetClass ||
+            a.targetClass === 'All' ||
+            (userClass && String(a.targetClass) === userClass)
+        );
 
         if (filtered.length === 0) {
-            list.innerHTML = '<p style="color: #94a3b8; text-align: center; grid-column: 1/-1;">No announcements for your class.</p>';
+            list.innerHTML = `<p style="color: #94a3b8; text-align: center; grid-column: 1/-1;">No announcements found for Class ${userClass || '(Not Set)'}.</p>`;
             return;
         }
 
