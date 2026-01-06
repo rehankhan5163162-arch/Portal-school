@@ -520,11 +520,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function updateStats() {
-        const announcements = JSON.parse(localStorage.getItem('announcements') || '[]');
-        const assignments = JSON.parse(localStorage.getItem('assignments') || '[]');
-        const quizzes = JSON.parse(localStorage.getItem('quizzes') || '[]');
-        const students = JSON.parse(localStorage.getItem('students') || '[]');
-
+        // Use the in-memory arrays which are populated by Firebase listeners
         document.getElementById('totalAnnouncements').textContent = announcements.length;
         document.getElementById('totalAssignments').textContent = assignments.length;
         document.getElementById('totalQuizzes').textContent = quizzes.length;

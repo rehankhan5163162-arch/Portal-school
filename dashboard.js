@@ -512,7 +512,7 @@ document.addEventListener('DOMContentLoaded', () => {
     window.submitQuiz = function (isAuto = false) {
         if (currentQuizTimer) clearInterval(currentQuizTimer);
 
-        const quizzes = JSON.parse(localStorage.getItem('quizzes') || '[]');
+        // Use global quizzes array which is synced from Firebase
         const quiz = quizzes.find(q => q.id === currentQuizId);
         if (!quiz) return;
 
