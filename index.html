@@ -7,6 +7,7 @@
     <title>Welcome - School LMS</title>
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="theme.js"></script>
     <script>
         // Auto-redirect removed to allow landing page view
@@ -31,12 +32,8 @@
                     <button id="loginBtn" class="btn secondary">
                         <span class="btn-text">Log In</span>
                     </button>
-                    <button id="settingsBtn" class="btn tertiary">
-                        <span class="icon">⚙️</span>
-                        <span class="btn-text">Settings</span>
-                    </button>
                     <button id="themeBtn" class="btn tertiary">
-                        <span class="icon">🎨</span>
+                        <span class="icon"><i class="fas fa-palette"></i></span>
                         <span class="btn-text">Change Mode</span>
                     </button>
                 </div>
@@ -64,17 +61,17 @@
             <h2 class="section-title">Why Choose Rehankhan Acadmy?</h2>
             <div class="features-grid">
                 <div class="feature-card">
-                    <span class="feature-icon">🚀</span>
+                    <span class="feature-icon"><i class="fas fa-rocket"></i></span>
                     <h3>Smart Quizzes</h3>
                     <p>Adaptive MCQ quizzes designed to challenge your understanding and improve retention.</p>
                 </div>
                 <div class="feature-card">
-                    <span class="feature-icon">📊</span>
+                    <span class="feature-icon"><i class="fas fa-chart-line"></i></span>
                     <h3>Real-time Analytics</h3>
                     <p>Track your progress with detailed performance insights and descriptive test feedback.</p>
                 </div>
                 <div class="feature-card">
-                    <span class="feature-icon">🛡️</span>
+                    <span class="feature-icon"><i class="fas fa-shield-alt"></i></span>
                     <h3>Secure Learning</h3>
                     <p>A safe, controlled environment for students and administrators to manage educational goals.</p>
                 </div>
@@ -88,7 +85,7 @@
                     <p class="quote">"The MCQ quizzes helped me track my progress daily. The glassmorphic design is just
                         the cherry on top!"</p>
                     <div class="student-info">
-                        <span class="student-avatar">👨‍🎓</span>
+                        <span class="student-avatar"><i class="fas fa-user-graduate"></i></span>
                         <div>
                             <h4>Aman Gupta</h4>
                             <p>Grade 12 Student</p>
@@ -99,7 +96,7 @@
                     <p class="quote">"The administrative portal is so easy to use. Posting announcements and grading
                         tests is a breeze."</p>
                     <div class="student-info">
-                        <span class="student-avatar">👩‍🏫</span>
+                        <span class="student-avatar"><i class="fas fa-chalkboard-teacher"></i></span>
                         <div>
                             <h4>Sarah Khan</h4>
                             <p>Senior Faculty</p>
@@ -115,8 +112,7 @@
                 <div class="faq-item">
                     <button class="faq-question">How do I access my dashboard? <span>+</span></button>
                     <div class="faq-answer">
-                        <p>Simply log in using your registered email and roll number. If you're an admin, use the
-                            settings portal.</p>
+                        <p>Simply log in using your registered email and password.</p>
                     </div>
                 </div>
                 <div class="faq-item">
@@ -170,8 +166,30 @@
                     <input type="email" id="signup-email" name="email" required>
                 </div>
                 <div class="form-group">
+                    <label for="signup-class">Class</label>
+                    <select id="signup-class" name="class" required>
+                        <option value="" disabled selected>Select your class</option>
+                        <option value="1">Class 1</option>
+                        <option value="2">Class 2</option>
+                        <option value="3">Class 3</option>
+                        <option value="4">Class 4</option>
+                        <option value="5">Class 5</option>
+                        <option value="6">Class 6</option>
+                        <option value="7">Class 7</option>
+                        <option value="8">Class 8</option>
+                        <option value="9">Class 9</option>
+                        <option value="10">Class 10</option>
+                        <option value="11">Class 11</option>
+                        <option value="12">Class 12</option>
+                    </select>
+                </div>
+                <div class="form-group">
                     <label for="signup-roll">Roll Number</label>
                     <input type="text" id="signup-roll" name="rollNumber" required>
+                </div>
+                <div class="form-group">
+                    <label for="signup-password">Password</label>
+                    <input type="password" id="signup-password" name="password" required>
                 </div>
                 <button type="submit" class="btn primary">
                     <span class="btn-text">Sign Up</span>
@@ -192,12 +210,8 @@
                     <input type="email" id="login-email" name="email" required>
                 </div>
                 <div class="form-group">
-                    <label for="login-roll">Roll Number</label>
-                    <input type="text" id="login-roll" name="rollNumber" required>
-                </div>
-                <div class="form-group">
-                    <label for="login-name">Full Name</label>
-                    <input type="text" id="login-name" name="name" required>
+                    <label for="login-password">Password</label>
+                    <input type="password" id="login-password" name="password" required>
                 </div>
                 <button type="submit" class="btn primary">
                     <span class="btn-text">Log In</span>
@@ -207,96 +221,14 @@
         </div>
     </div>
 
-    <!-- Settings Modal -->
-    <div id="settingsModal" class="modal">
-        <div class="modal-content settings-panel">
-            <span class="close" data-modal="settingsModal">&times;</span>
-            <div class="settings-header">
-                <h2>Settings</h2>
-                <div class="settings-tabs">
-                    <button class="settings-tab active" data-tab="tab-preferences">Preferences</button>
-                    <button class="settings-tab" data-tab="tab-admin">Admin Access</button>
-                </div>
-            </div>
-
-            <div id="tab-preferences" class="tab-content active">
-                <div class="settings-list">
-                    <div class="setting-item">
-                        <div class="setting-info">
-                            <span class="setting-icon">✨</span>
-                            <div>
-                                <h4>Background Animations</h4>
-                                <p>Enable flowing visual effects</p>
-                            </div>
-                        </div>
-                        <label class="switch">
-                            <input type="checkbox" id="toggle-animations" checked>
-                            <span class="slider"></span>
-                        </label>
-                    </div>
-                    <div class="setting-item">
-                        <div class="setting-info">
-                            <span class="setting-icon">🔔</span>
-                            <div>
-                                <h4>Notifications</h4>
-                                <p>Get alerts for new assignments</p>
-                            </div>
-                        </div>
-                        <label class="switch">
-                            <input type="checkbox" id="toggle-notifications" checked>
-                            <span class="slider"></span>
-                        </label>
-                    </div>
-                    <div class="setting-item">
-                        <div class="setting-info">
-                            <span class="setting-icon">🔊</span>
-                            <div>
-                                <h4>Sound Effects</h4>
-                                <p>Interactive click sounds</p>
-                            </div>
-                        </div>
-                        <label class="switch">
-                            <input type="checkbox" id="toggle-sounds">
-                            <span class="slider"></span>
-                        </label>
-                    </div>
-                    <div class="setting-item dangerous">
-                        <div class="setting-info">
-                            <span class="setting-icon">🧹</span>
-                            <div>
-                                <h4>Clear All Data</h4>
-                                <p>Reset sessions and local storage</p>
-                            </div>
-                        </div>
-                        <button id="clearDataBtn" class="btn-text-only">Clear</button>
-                    </div>
-                </div>
-            </div>
-
-            <div id="tab-admin" class="tab-content">
-                <p class="admin-notice">Enter password to access administrator dashboard and management tools.</p>
-                <form id="settingsForm">
-                    <div class="form-group">
-                        <label for="settings-password">Admin Password</label>
-                        <input type="password" id="settings-password" name="password" placeholder="Enter password"
-                            required>
-                    </div>
-                    <button type="submit" class="btn primary">
-                        <span class="btn-text">Access Portal</span>
-                        <div class="btn-shine"></div>
-                    </button>
-                </form>
-            </div>
-        </div>
-    </div>
+    <!-- Settings Modal Removed -->
 
     <!-- Theme Modal -->
     <div id="themeModal" class="modal">
         <div class="modal-content">
             <span class="close" data-modal="themeModal">&times;</span>
             <h2>Select Interface Mode</h2>
-            <div id="themeGrid" class="theme-grid"
-                style="display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 1rem; margin-top: 1.5rem;">
+            <div id="themeGrid" class="theme-grid">
                 <!-- Generated by JS -->
             </div>
         </div>
@@ -308,37 +240,26 @@
         const themeModal = document.getElementById('themeModal');
         const themeGrid = document.getElementById('themeGrid');
 
-        themeBtn.addEventListener('click', () => {
-            themeModal.style.display = 'flex';
-            renderThemeGrid();
-        });
+        if (themeBtn) {
+            themeBtn.addEventListener('click', () => {
+                themeModal.style.display = 'flex';
+                renderThemeGrid();
+            });
+        }
 
         function renderThemeGrid() {
+            if (!themeGrid) return;
+
             themeGrid.innerHTML = Object.keys(themes).map(key => {
                 const t = themes[key];
-                const isSelected = localStorage.getItem('selectedTheme') === key ? 'border: 2px solid white;' : 'border: 1px solid rgba(255,255,255,0.2);';
+                const isSelected = localStorage.getItem('selectedTheme') === key ? 'active' : '';
                 // Convert camelCase or key to Title Case
                 const name = key.charAt(0).toUpperCase() + key.slice(1);
 
                 return `
-            <div onclick="applyTheme('${key}'); renderThemeGrid();" style="
-                cursor: pointer; 
-                background: ${t['--bg-dark']}; 
-                padding: 1rem; 
-                border-radius: 12px; 
-                text-align: center;
-                ${isSelected}
-                transition: transform 0.2s;
-            " onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
-                <div style="
-                    width: 100%; 
-                    height: 40px; 
-                    background: linear-gradient(135deg, ${t['--primary-color']}, ${t['--primary-hover']}); 
-                    border-radius: 8px; 
-                    margin-bottom: 0.5rem;
-                    box-shadow: 0 4px 6px rgba(0,0,0,0.2);
-                "></div>
-                <span style="color: ${t['--text-light']}; font-size: 0.9rem; font-weight: 500;">${name}</span>
+            <div class="theme-card ${isSelected}" onclick="applyTheme('${key}'); renderThemeGrid();" style="background: ${t['--bg-dark']};">
+                <div class="theme-preview" style="background: linear-gradient(135deg, ${t['--primary-color']}, ${t['--primary-hover']});"></div>
+                <span class="theme-name" style="color: ${t['--text-light']};">${name}</span>
             </div>
         `;
             }).join('');
@@ -369,7 +290,7 @@
         const database = firebase.database();
     </script>
     <script>
-          database.ref("test").set("Firebase Connected");
+        database.ref("test").set("Firebase Connected");
     </script>
     <script src="script.js"></script>
 </body>

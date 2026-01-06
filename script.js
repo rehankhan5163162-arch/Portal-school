@@ -79,13 +79,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 200);
     });
 
-    settingsBtn.addEventListener('click', (e) => {
-        addRippleEffect(e);
-        setTimeout(() => {
-            openModal(settingsModal);
-        }, 200);
-    });
-
     // Close button handlers
     document.querySelectorAll('.close').forEach(closeBtn => {
         closeBtn.addEventListener('click', () => {
@@ -103,8 +96,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if (e.target === loginModal) {
             closeModal(loginModal);
         }
-        if (e.target === settingsModal) {
-            closeModal(settingsModal);
+        if (e.target === themeModal) {
+            closeModal(themeModal);
         }
     });
 
@@ -127,7 +120,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Add new student to Firebase
             database.ref('students').push(data).then(() => {
-                // Set current user session (keeping this in localStorage for persistence across pages)
+                // Set current user session
                 localStorage.setItem('currentUser', JSON.stringify(data));
 
                 console.log('Sign Up Data:', data);
@@ -142,26 +135,35 @@ document.addEventListener('DOMContentLoaded', () => {
     loginForm.addEventListener('submit', (e) => {
         e.preventDefault();
         const formData = new FormData(loginForm);
-        const data = Object.fromEntries(formData);
+        const email = formData.get('email');
+        const password = formData.get('password');
+
+        // Admin Check
+        if (email === 'rehankhan1668634@gmail.com' && password === 'Admin1668634') {
+            console.log('Admin Login Success');
+            alert('Welcome Admin! Redirecting to Admin Dashboard...');
+            window.location.href = 'admin.html';
+            return;
+        }
 
         // Fetch students from Firebase
         database.ref('students').once('value', (snapshot) => {
             const val = snapshot.val();
             const students = val ? Object.values(val) : [];
 
-            // Find student
-            const student = students.find(s => s.rollNumber === data.rollNumber && s.name === data.name);
+            // Find student with matching email and password
+            const student = students.find(s => s.email === email && s.password === password);
 
             if (student) {
                 // Set current user session
                 localStorage.setItem('currentUser', JSON.stringify(student));
 
-                console.log('Login Data:', data);
+                console.log('Login Success:', student.name);
                 alert(`Welcome back, ${student.name}!\nLogging in...`);
 
                 window.location.href = 'dashboard.html';
             } else {
-                alert('Invalid Name or Roll Number! Please try again or Sign Up.');
+                alert('Invalid Email or Password! Please try again.');
             }
         });
     });
@@ -181,84 +183,5 @@ document.addEventListener('DOMContentLoaded', () => {
                 item.classList.add('active');
             }
         });
-    });
-
-    // Enhanced Settings Logic
-    const settingsTabs = document.querySelectorAll('.settings-tab');
-    const tabContents = document.querySelectorAll('.tab-content');
-    const toggleAnimations = document.getElementById('toggle-animations');
-    const clearDataBtn = document.getElementById('clearDataBtn');
-    const backgroundAnim = document.querySelector('.background-animation');
-
-    // Load saved preferences
-    const savedAnim = localStorage.getItem('settings-animations');
-    if (savedAnim === 'false') {
-        toggleAnimations.checked = false;
-        if (backgroundAnim) backgroundAnim.style.display = 'none';
-    }
-
-    const savedNotifs = localStorage.getItem('settings-notifications');
-    if (savedNotifs === 'false') document.getElementById('toggle-notifications').checked = false;
-
-    const savedSounds = localStorage.getItem('settings-sounds');
-    if (savedSounds === 'true') document.getElementById('toggle-sounds').checked = true;
-
-    // Tab Switching
-    settingsTabs.forEach(tab => {
-        tab.addEventListener('click', () => {
-            const target = tab.getAttribute('data-tab');
-
-            settingsTabs.forEach(t => t.classList.remove('active'));
-            tabContents.forEach(c => c.classList.remove('active'));
-
-            tab.classList.add('active');
-            document.getElementById(target).classList.add('active');
-        });
-    });
-
-    // Animation Toggle
-    toggleAnimations.addEventListener('change', (e) => {
-        const isEnabled = e.target.checked;
-        localStorage.setItem('settings-animations', isEnabled);
-        if (backgroundAnim) {
-            backgroundAnim.style.display = isEnabled ? 'block' : 'none';
-        }
-    });
-
-    // Other Toggles (Mock functionality)
-    document.getElementById('toggle-notifications').addEventListener('change', (e) => {
-        localStorage.setItem('settings-notifications', e.target.checked);
-    });
-
-    document.getElementById('toggle-sounds').addEventListener('change', (e) => {
-        localStorage.setItem('settings-sounds', e.target.checked);
-    });
-
-    // Clear Data
-    clearDataBtn.addEventListener('click', () => {
-        if (confirm('Are you sure you want to clear all data? This will log you out and reset all records.')) {
-            localStorage.clear();
-            alert('All data has been cleared. Redirecting...');
-            window.location.reload();
-        }
-    });
-
-    // Settings form submission handler
-    settingsForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const formData = new FormData(settingsForm);
-        const password = formData.get('password');
-
-        // Check if password is correct
-        if (password === 'admin123') {
-            console.log('Settings access granted');
-            alert('Access Granted! Redirecting to Admin Dashboard...');
-
-            // Redirect to admin dashboard
-            window.location.href = 'admin.html';
-        } else {
-            alert('Incorrect Password! Please try again.');
-            settingsForm.reset();
-        }
     });
 });

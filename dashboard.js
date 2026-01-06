@@ -157,13 +157,16 @@ document.addEventListener('DOMContentLoaded', () => {
     function displayAnnouncements() {
         const list = document.getElementById('announcementsList');
 
-        if (announcements.length === 0) {
-            list.innerHTML = '<p style="color: #94a3b8; text-align: center; grid-column: 1/-1;">No announcements yet.</p>';
+        // Filter by class
+        const filtered = announcements.filter(a => !a.targetClass || a.targetClass === 'All' || a.targetClass === currentUser.class);
+
+        if (filtered.length === 0) {
+            list.innerHTML = '<p style="color: #94a3b8; text-align: center; grid-column: 1/-1;">No announcements for your class.</p>';
             return;
         }
 
         // Sort by id (newest first assuming id is timestamp) or use date
-        const sorted = [...announcements].sort((a, b) => (b.id || 0) - (a.id || 0));
+        const sorted = [...filtered].sort((a, b) => (b.id || 0) - (a.id || 0));
 
         list.innerHTML = sorted.map(a => `
             <div class="announcement-card" style="background: white; padding: 1.5rem; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); margin-bottom: 1rem;">
@@ -179,12 +182,15 @@ document.addEventListener('DOMContentLoaded', () => {
     function displayAssignments() {
         const list = document.getElementById('assignmentsList');
 
-        if (assignments.length === 0) {
-            list.innerHTML = '<p style="color: #94a3b8; text-align: center; grid-column: 1/-1;">No assignments assigned yet.</p>';
+        // Filter by class
+        const filtered = assignments.filter(a => !a.targetClass || a.targetClass === 'All' || a.targetClass === currentUser.class);
+
+        if (filtered.length === 0) {
+            list.innerHTML = '<p style="color: #94a3b8; text-align: center; grid-column: 1/-1;">No assignments for your class.</p>';
             return;
         }
 
-        list.innerHTML = assignments.map(a => {
+        list.innerHTML = filtered.map(a => {
             const submission = assignmentSubmissions.find(s => s.assignmentId == a.id && s.rollNumber === currentUser.rollNumber);
             let statusHtml = '';
 
@@ -218,12 +224,15 @@ document.addEventListener('DOMContentLoaded', () => {
     function displayQuizzes() {
         const list = document.getElementById('quizList');
 
-        if (quizzes.length === 0) {
-            list.innerHTML = '<p style="color: #94a3b8; text-align: center; grid-column: 1/-1;">No quizzes available.</p>';
+        // Filter by class
+        const filtered = quizzes.filter(q => !q.targetClass || q.targetClass === 'All' || q.targetClass === currentUser.class);
+
+        if (filtered.length === 0) {
+            list.innerHTML = '<p style="color: #94a3b8; text-align: center; grid-column: 1/-1;">No quizzes available for your class.</p>';
             return;
         }
 
-        list.innerHTML = quizzes.map(q => {
+        list.innerHTML = filtered.map(q => {
             const result = quizResults.find(r => r.quizId == q.id && r.rollNumber === currentUser.rollNumber);
             let actionHtml = '';
 
@@ -246,12 +255,15 @@ document.addEventListener('DOMContentLoaded', () => {
     function displayTests() {
         const list = document.getElementById('testList');
 
-        if (tests.length === 0) {
-            list.innerHTML = '<p style="color: #94a3b8; text-align: center; grid-column: 1/-1;">No tests scheduled.</p>';
+        // Filter by class
+        const filtered = tests.filter(t => !t.targetClass || t.targetClass === 'All' || t.targetClass === currentUser.class);
+
+        if (filtered.length === 0) {
+            list.innerHTML = '<p style="color: #94a3b8; text-align: center; grid-column: 1/-1;">No tests scheduled for your class.</p>';
             return;
         }
 
-        list.innerHTML = tests.map(t => {
+        list.innerHTML = filtered.map(t => {
             // Check if student already took this test
             const submission = testResults.find(r => r.testId == t.id && r.rollNumber === currentUser.rollNumber);
             let actionHtml = '';
@@ -285,12 +297,14 @@ document.addEventListener('DOMContentLoaded', () => {
     function displaySyllabus() {
         const list = document.getElementById('syllabusList');
 
-        if (syllabus.length === 0) {
-            list.innerHTML = '<p style="color: #94a3b8; text-align: center; grid-column: 1/-1;">No syllabus uploaded.</p>';
+        const filtered = syllabus.filter(s => !s.targetClass || s.targetClass === 'All' || s.targetClass === currentUser.class);
+
+        if (filtered.length === 0) {
+            list.innerHTML = '<p style="color: #94a3b8; text-align: center; grid-column: 1/-1;">No syllabus found for your class.</p>';
             return;
         }
 
-        list.innerHTML = syllabus.map(s => `
+        list.innerHTML = filtered.map(s => `
             <div class="syllabus-card">
                 <h3>${s.subject}</h3>
                 <ul>
@@ -786,15 +800,19 @@ document.addEventListener('DOMContentLoaded', () => {
         const list = document.getElementById('studentResourcesList');
         if (!list) return;
 
-        if (resources.length === 0) {
-            list.innerHTML = '<p style="color: #94a3b8; padding: 2rem;">No study resources have been shared yet. Check back later!</p>';
+        const filtered = resources.filter(r => !r.targetClass || r.targetClass === 'All' || r.targetClass === currentUser.class);
+
+        if (filtered.length === 0) {
+            list.innerHTML = '<p style="color: #94a3b8; padding: 2rem;">No study resources for your class yet.</p>';
             return;
         }
 
-        list.innerHTML = resources.map(res => `
+        list.innerHTML = filtered.map(res => `
             <div class="stat-card" style="flex-direction: column; align-items: flex-start; gap: 1rem; position: relative;">
                 <span style="position: absolute; top: 1rem; right: 1rem; font-size: 0.75rem; background: var(--primary-color); padding: 2px 8px; border-radius: 10px;">${res.type}</span>
-                <div style="font-size: 1.5rem;">${res.type === 'Video' ? '🎥' : res.type === 'PDF' ? '📄' : '🔗'}</div>
+                <div style="font-size: 1.5rem;">
+                    ${res.type === 'Video' ? '<i class="fas fa-video"></i>' : res.type === 'PDF' ? '<i class="fas fa-file-pdf"></i>' : '<i class="fas fa-link"></i>'}
+                </div>
                 <div>
                     <h4 style="color: white; margin-bottom: 0.25rem;">${res.title}</h4>
                     <p style="font-size: 0.8rem; color: #94a3b8;">Shared on ${res.date}</p>
@@ -836,7 +854,9 @@ document.addEventListener('DOMContentLoaded', () => {
             leaderboardData[email].quizzes += 1;
         });
 
-        const sortedScores = Object.values(leaderboardData).sort((a, b) => b.points - a.points);
+        const sortedScores = Object.values(leaderboardData)
+            .filter(s => s.points > 0) // Filter out students with 0 points
+            .sort((a, b) => b.points - a.points);
 
         if (sortedScores.length === 0) {
             tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; padding: 3rem; color: #94a3b8;">Rankings are empty.</td></tr>';
@@ -848,7 +868,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <td style="padding: 1.25rem;"><span style="display: flex; align-items: center; justify-content: center; width: 28px; height: 28px; background: ${index === 0 ? '#ffd700' : index === 1 ? '#c0c0c0' : index === 2 ? '#cd7f32' : 'rgba(255,255,255,0.05)'}; color: ${index < 3 ? '#000' : '#fff'}; border-radius: 50%; font-weight: bold; font-size: 0.85rem;">${index + 1}</span></td>
                 <td style="padding: 1.25rem;">
                     <div style="display: flex; align-items: center; gap: 0.75rem;">
-                        <span style="font-size: 1.2rem;">${index === 0 ? '👑' : '👤'}</span>
+                        <span style="font-size: 1.2rem;">${index === 0 ? '<i class="fas fa-crown" style="color: gold;"></i>' : '<i class="fas fa-user"></i>'}</span>
                         <span style="font-weight: 500;">${student.name} ${student.name === currentUser.name ? '(You)' : ''}</span>
                     </div>
                 </td>
@@ -863,6 +883,31 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('profileName').textContent = currentUser.name || 'N/A';
         document.getElementById('profileEmail').textContent = currentUser.email || 'N/A';
         document.getElementById('profileRoll').textContent = currentUser.rollNumber || 'N/A';
+
+        // Password Logic
+        const passwordInput = document.getElementById('profilePassword');
+        if (passwordInput && currentUser.password) {
+            passwordInput.value = currentUser.password;
+        }
+
+        const toggleBtn = document.getElementById('togglePasswordBtn');
+        const icon = document.getElementById('passwordIcon');
+
+        // Remove old listeners to prevent duplicates if function called multiple times
+        const newToggle = toggleBtn.cloneNode(true);
+        toggleBtn.parentNode.replaceChild(newToggle, toggleBtn);
+
+        newToggle.addEventListener('click', () => {
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                passwordInput.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        });
     }
 
     // Safe Initialization

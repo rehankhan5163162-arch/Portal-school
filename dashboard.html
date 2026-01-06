@@ -7,6 +7,7 @@
     <title>Student Dashboard - EduSphere</title>
     <link rel="stylesheet" href="dashboard.css">
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="theme.js"></script>
 </head>
 
@@ -18,52 +19,52 @@
                 <h2>EduSphere</h2>
                 <div class="sidebar-header">
                     <p class="student-name" id="studentName">Student Portal</p>
-                    <button id="closeSidebar" class="mobile-only-btn">✕</button>
+                    <button id="closeSidebar" class="mobile-only-btn"><i class="fas fa-times"></i></button>
                 </div>
             </div>
             <nav class="menu">
                 <a href="#" class="menu-item active" data-section="dashboard">
-                    <span class="icon">📊</span>
+                    <span class="icon"><i class="fas fa-chart-pie"></i></span>
                     <span>Dashboard</span>
                 </a>
                 <a href="#" class="menu-item" data-section="announcements">
-                    <span class="icon">📢</span>
+                    <span class="icon"><i class="fas fa-bullhorn"></i></span>
                     <span>Announcements</span>
                 </a>
                 <a href="#" class="menu-item" data-section="assignments">
-                    <span class="icon">📝</span>
+                    <span class="icon"><i class="fas fa-tasks"></i></span>
                     <span>Assignments</span>
                 </a>
                 <a href="#" class="menu-item" data-section="quiz">
-                    <span class="icon">❓</span>
+                    <span class="icon"><i class="fas fa-graduation-cap"></i></span>
                     <span>Quiz</span>
                 </a>
                 <a href="#" class="menu-item" data-section="test">
-                    <span class="icon">📋</span>
+                    <span class="icon"><i class="fas fa-chalkboard-teacher"></i></span>
                     <span>Test</span>
                 </a>
                 <a href="#" class="menu-item" data-section="syllabus">
-                    <span class="icon">📚</span>
+                    <span class="icon"><i class="fas fa-book-open"></i></span>
                     <span>Syllabus</span>
                 </a>
                 <a href="#" class="menu-item" data-section="attendance">
-                    <span class="icon">✅</span>
+                    <span class="icon"><i class="fas fa-user-check"></i></span>
                     <span>Attendance</span>
                 </a>
                 <a href="#" class="menu-item" data-section="resources-student">
-                    <span class="icon">📖</span>
+                    <span class="icon"><i class="fas fa-folder-open"></i></span>
                     <span>Resources</span>
                 </a>
                 <a href="#" class="menu-item" data-section="leaderboard-student">
-                    <span class="icon">🏆</span>
+                    <span class="icon"><i class="fas fa-trophy"></i></span>
                     <span>Leaderboard</span>
                 </a>
                 <a href="#" class="menu-item" data-section="profile">
-                    <span class="icon">👤</span>
+                    <span class="icon"><i class="fas fa-user-circle"></i></span>
                     <span>Profile</span>
                 </a>
                 <a href="#" class="menu-item logout" id="logoutBtn">
-                    <span class="icon">🚪</span>
+                    <span class="icon"><i class="fas fa-sign-out-alt"></i></span>
                     <span>Logout</span>
                 </a>
             </nav>
@@ -72,7 +73,7 @@
         <!-- Main Content -->
         <main class="main-content">
             <header class="top-bar">
-                <button id="menuBtn" class="mobile-only-btn">☰</button>
+                <button id="menuBtn" class="mobile-only-btn"><i class="fas fa-bars"></i></button>
                 <h1 id="pageTitle">Dashboard</h1>
                 <div class="user-info">
                     <span id="userEmail">student@edusphere.com</span>
@@ -88,14 +89,14 @@
 
                 <div class="stats-grid">
                     <div class="stat-card">
-                        <div class="stat-icon">📝</div>
+                        <div class="stat-icon"><i class="fas fa-clock"></i></div>
                         <div class="stat-info">
                             <h3>0</h3>
                             <p>Pending Assignments</p>
                         </div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-icon">❓</div>
+                        <div class="stat-icon"><i class="far fa-calendar-alt"></i></div>
                         <div class="stat-info">
                             <h3>0</h3>
                             <p>Upcoming Quizzes</p>
@@ -145,7 +146,8 @@
                     style="display: flex; flex-direction: column; gap: 2rem; align-items: center; padding: 3rem;">
                     <div class="profile-avatar"
                         style="font-size: 5rem; width: 150px; height: 150px; background: rgba(255,255,255,0.05); display: flex; align-items: center; justify-content: center; border-radius: 50%; border: 2px solid var(--primary-color);">
-                        👨‍🎓</div>
+                        <i class="fas fa-user-graduate"></i>
+                    </div>
                     <div class="profile-details" style="width: 100%; max-width: 400px;">
                         <div class="detail-item"
                             style="display: flex; justify-content: space-between; padding: 1rem 0; border-bottom: 1px solid var(--glass-border);">
@@ -167,58 +169,71 @@
                             <span style="color: #94a3b8;">Status</span>
                             <span style="color: #10b981; font-weight: 600;">Active Student</span>
                         </div>
+                        <div class="detail-item"
+                            style="display: flex; justify-content: space-between; align-items: center; padding: 1rem 0; border-bottom: 1px solid var(--glass-border);">
+                            <span style="color: #94a3b8;">Password</span>
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <input type="password" id="profilePassword" readonly value="********"
+                                    style="background: transparent; border: none; color: white; font-weight: 600; width: 100px;">
+                                <button id="togglePasswordBtn"
+                                    style="background: none; border: none; color: #94a3b8; cursor: pointer;">
+                                    <i class="fas fa-eye" id="passwordIcon"></i>
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </section>
+    </div>
+    </section>
 
-            <!-- Announcements Section -->
-            <section id="announcements" class="content-section">
-                <h2>Announcements</h2>
-                <div class="announcements-list" id="announcementsList">
-                    <!-- Announcements will be loaded dynamically -->
-                </div>
-            </section>
+    <!-- Announcements Section -->
+    <section id="announcements" class="content-section">
+        <h2>Announcements</h2>
+        <div class="announcements-list" id="announcementsList">
+            <!-- Announcements will be loaded dynamically -->
+        </div>
+    </section>
 
-            <!-- Assignments Section -->
-            <section id="assignments" class="content-section">
-                <h2>Your Assignments</h2>
-                <div class="assignments-list" id="assignmentsList">
-                    <!-- Assignments will be loaded dynamically -->
-                </div>
-            </section>
+    <!-- Assignments Section -->
+    <section id="assignments" class="content-section">
+        <h2>Your Assignments</h2>
+        <div class="assignments-list" id="assignmentsList">
+            <!-- Assignments will be loaded dynamically -->
+        </div>
+    </section>
 
-            <!-- Quiz Section -->
-            <section id="quiz" class="content-section">
-                <h2>Available Quizzes</h2>
-                <div class="quiz-list" id="quizList">
-                    <!-- Quizzes will be loaded dynamically -->
-                </div>
-            </section>
+    <!-- Quiz Section -->
+    <section id="quiz" class="content-section">
+        <h2>Available Quizzes</h2>
+        <div class="quiz-list" id="quizList">
+            <!-- Quizzes will be loaded dynamically -->
+        </div>
+    </section>
 
-            <!-- Test Section -->
-            <section id="test" class="content-section">
-                <h2>Scheduled Tests</h2>
-                <div class="test-list" id="testList">
-                    <!-- Tests will be loaded dynamically -->
-                </div>
-            </section>
+    <!-- Test Section -->
+    <section id="test" class="content-section">
+        <h2>Scheduled Tests</h2>
+        <div class="test-list" id="testList">
+            <!-- Tests will be loaded dynamically -->
+        </div>
+    </section>
 
-            <!-- Syllabus Section -->
-            <section id="syllabus" class="content-section">
-                <h2>Course Syllabus</h2>
-                <div class="syllabus-list" id="syllabusList">
-                    <!-- Syllabus will be loaded dynamically -->
-                </div>
-            </section>
+    <!-- Syllabus Section -->
+    <section id="syllabus" class="content-section">
+        <h2>Course Syllabus</h2>
+        <div class="syllabus-list" id="syllabusList">
+            <!-- Syllabus will be loaded dynamically -->
+        </div>
+    </section>
 
-            <!-- Attendance Section -->
-            <section id="attendance" class="content-section">
-                <h2>My Attendance</h2>
-                <div class="attendance-list" id="attendanceList">
-                    <!-- Attendance will be loaded dynamically -->
-                </div>
-            </section>
-        </main>
+    <!-- Attendance Section -->
+    <section id="attendance" class="content-section">
+        <h2>My Attendance</h2>
+        <div class="attendance-list" id="attendanceList">
+            <!-- Attendance will be loaded dynamically -->
+        </div>
+    </section>
+    </main>
     </div>
 
     <!-- Quiz Modal -->
@@ -292,7 +307,8 @@
                 </div>
 
                 <div id="submissionStatus" style="display: none; text-align: center; padding: 2rem;">
-                    <div class="status-icon" style="font-size: 3rem; margin-bottom: 1rem;">✅</div>
+                    <div class="status-icon" style="font-size: 3rem; margin-bottom: 1rem;"><i
+                            class="fas fa-check-circle" style="color: #10b981;"></i></div>
                     <h3>Submitted Successfully!</h3>
                     <p>Your assignment has been submitted for grading.</p>
                 </div>

@@ -120,11 +120,13 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('announcementForm').addEventListener('submit', (e) => {
         e.preventDefault();
         const title = document.getElementById('announcement-title').value;
+        const targetClass = document.getElementById('announcement-class').value;
         const message = document.getElementById('announcement-message').value;
 
         const announcement = {
             id: Date.now(),
             title,
+            targetClass,
             message,
             date: new Date().toLocaleDateString()
         };
@@ -140,6 +142,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('assignmentForm').addEventListener('submit', (e) => {
         e.preventDefault();
         const title = document.getElementById('assignment-title').value;
+        const targetClass = document.getElementById('assignment-class').value;
         const subject = document.getElementById('assignment-subject').value;
         const description = document.getElementById('assignment-description').value;
         const marks = document.getElementById('assignment-marks').value;
@@ -148,6 +151,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const assignment = {
             id: Date.now(),
             title,
+            targetClass,
             subject,
             description,
             marks,
@@ -197,6 +201,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('quizForm').addEventListener('submit', (e) => {
         e.preventDefault();
         const title = document.getElementById('quiz-title').value;
+        const targetClass = document.getElementById('quiz-class').value;
         const duration = document.getElementById('quiz-duration').value;
 
         const container = document.getElementById('questionsContainer');
@@ -218,6 +223,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const quiz = {
             id: Date.now(),
             title,
+            targetClass,
             duration,
             questions,
             createdDate: new Date().toLocaleDateString()
@@ -276,6 +282,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('testForm').addEventListener('submit', (e) => {
         e.preventDefault();
         const title = document.getElementById('test-title').value;
+        const targetClass = document.getElementById('test-class').value;
         const subject = document.getElementById('test-subject').value;
         const date = document.getElementById('test-date').value;
         const time = document.getElementById('test-time').value;
@@ -289,6 +296,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const test = {
             id: Date.now(),
             title,
+            targetClass,
             subject,
             date,
             time,
@@ -320,11 +328,13 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('syllabusForm').addEventListener('submit', (e) => {
         e.preventDefault();
         const subject = document.getElementById('syllabus-subject').value;
+        const targetClass = document.getElementById('syllabus-class').value;
         const topics = document.getElementById('syllabus-topics').value.split('\n').filter(t => t.trim());
 
         const syllabusItem = {
             id: Date.now(),
             subject,
+            targetClass,
             topics
         };
 
@@ -488,21 +498,24 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function displayStudents() {
-        const list = document.getElementById('studentsList');
+        const tbody = document.getElementById('studentsTableBody');
 
         if (students.length === 0) {
-            list.innerHTML = '<h3>All Students</h3><p style="color: #94a3b8;">No students registered yet.</p>';
+            tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 2rem; color: #94a3b8;">No students registered yet.</td></tr>';
             return;
         }
 
-        list.innerHTML = '<h3>All Students</h3>' + students.map((s) => `
-            <div class="item-card">
-                <h4>${s.name}</h4>
-                <p><strong>Roll Number:</strong> ${s.rollNumber}</p>
-                <p><strong>Email:</strong> ${s.email}</p>
-                <div class="meta">Class: ${s.class}</div>
-                <button class="btn-delete" onclick="deleteStudent('${s.firebaseId}')">Remove</button>
-            </div>
+        tbody.innerHTML = students.map((s) => `
+            <tr>
+                <td><div style="font-weight: 500;">${s.name}</div></td>
+                <td><span class="status-badge" style="background: #e0f2fe; color: #0369a1;">Class ${s.class || 'N/A'}</span></td>
+                <td>${s.rollNumber}</td>
+                <td>${s.email}</td>
+                <td>
+                    <button class="btn-view" style="padding: 4px 12px; font-size: 0.8rem;" onclick="openEditStudentModal('${s.firebaseId}')">Edit</button>
+                    <!-- <button class="btn-delete" style="padding: 4px 12px; font-size: 0.8rem;" onclick="deleteStudent('${s.firebaseId}')">Remove</button> -->
+                </td>
+            </tr>
         `).join('');
     }
 
@@ -794,12 +807,14 @@ document.addEventListener('DOMContentLoaded', () => {
             form.addEventListener('submit', (e) => {
                 e.preventDefault();
                 const title = document.getElementById('resource-title').value;
+                const targetClass = document.getElementById('resource-class').value;
                 const type = document.getElementById('resource-type').value;
                 const link = document.getElementById('resource-link').value;
 
                 const resource = {
                     id: Date.now(),
                     title,
+                    targetClass,
                     type,
                     link,
                     date: new Date().toLocaleDateString()
@@ -839,8 +854,11 @@ document.addEventListener('DOMContentLoaded', () => {
             card.style.border = '1px solid var(--glass-border)';
             card.style.position = 'relative';
 
+            const icon = res.type === 'Video' ? '<i class="fas fa-video"></i>' : res.type === 'PDF' ? '<i class="fas fa-file-pdf"></i>' : '<i class="fas fa-link"></i>';
+
             card.innerHTML = `
                 <span style="position: absolute; top: 0.5rem; right: 0.5rem; font-size: 0.8rem; background: var(--primary-color); padding: 2px 8px; border-radius: 10px;">${res.type}</span>
+                <div style="font-size: 1.5rem; margin-bottom: 0.5rem;">${icon}</div>
                 <h4 style="margin-bottom: 0.5rem;">${res.title}</h4>
                 <p style="font-size: 0.8rem; color: #94a3b8; margin-bottom: 1rem;">Added on ${res.date}</p>
                 <div style="display: flex; gap: 0.5rem;">
@@ -886,7 +904,9 @@ document.addEventListener('DOMContentLoaded', () => {
             leaderboardData[email].quizzes += 1;
         });
 
-        const sortedScores = Object.values(leaderboardData).sort((a, b) => b.totalPoints - a.totalPoints);
+        const sortedScores = Object.values(leaderboardData)
+            .filter(s => s.totalPoints > 0) // Filter: Show only students with points
+            .sort((a, b) => b.totalPoints - a.totalPoints);
 
         if (sortedScores.length === 0) {
             tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 2rem; color: #94a3b8;">No student records found.</td></tr>';
@@ -924,4 +944,56 @@ document.addEventListener('DOMContentLoaded', () => {
             form.dataset.initialized = "true";
         }
     }
+
+    // Student Edit Modal Logic
+    const editStudentModal = document.getElementById('editStudentModal');
+    const closeEditStudentBtn = document.getElementById('closeEditStudentModal');
+
+    if (closeEditStudentBtn) {
+        closeEditStudentBtn.addEventListener('click', () => {
+            editStudentModal.classList.remove('active');
+        });
+    }
+
+    window.openEditStudentModal = function (firebaseId) {
+        const student = students.find(s => s.firebaseId === firebaseId);
+        if (!student) return;
+
+        document.getElementById('editStudentId').value = firebaseId;
+        document.getElementById('edit-name').value = student.name || '';
+        document.getElementById('edit-email').value = student.email || '';
+        document.getElementById('edit-class').value = student.class || '1';
+        document.getElementById('edit-roll').value = student.rollNumber || '';
+        document.getElementById('edit-password').value = student.password || '';
+
+        editStudentModal.classList.add('active');
+    };
+
+    const editStudentForm = document.getElementById('editStudentForm');
+    if (editStudentForm) {
+        editStudentForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const firebaseId = document.getElementById('editStudentId').value;
+            const name = document.getElementById('edit-name').value;
+            const email = document.getElementById('edit-email').value;
+            const studentClass = document.getElementById('edit-class').value;
+            const rollNumber = document.getElementById('edit-roll').value;
+            const password = document.getElementById('edit-password').value;
+
+            database.ref('students').child(firebaseId).update({
+                name,
+                email,
+                class: studentClass,
+                rollNumber,
+                password
+            }).then(() => {
+                alert('Student profile updated successfully!');
+                editStudentModal.classList.remove('active');
+            }).catch(err => {
+                console.error(err);
+                alert('Error updating student profile.');
+            });
+        });
+    }
+
 });

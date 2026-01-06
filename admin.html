@@ -7,6 +7,7 @@
     <title>Admin Dashboard - EduSphere</title>
     <link rel="stylesheet" href="admin.css">
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="theme.js"></script>
 </head>
 
@@ -18,52 +19,52 @@
                 <h2>EduSphere</h2>
                 <div class="sidebar-header">
                     <p class="admin-label">Admin Portal</p>
-                    <button id="closeSidebar" class="mobile-only-btn">✕</button>
+                    <button id="closeSidebar" class="mobile-only-btn"><i class="fas fa-times"></i></button>
                 </div>
             </div>
             <nav class="menu">
                 <a href="#" class="menu-item active" data-section="overview">
-                    <span class="icon">📊</span>
+                    <span class="icon"><i class="fas fa-chart-pie"></i></span>
                     <span>Overview</span>
                 </a>
                 <a href="#" class="menu-item" data-section="students">
-                    <span class="icon">👥</span>
+                    <span class="icon"><i class="fas fa-users"></i></span>
                     <span>Students</span>
                 </a>
                 <a href="#" class="menu-item" data-section="announcements">
-                    <span class="icon">📢</span>
+                    <span class="icon"><i class="fas fa-bullhorn"></i></span>
                     <span>Announcements</span>
                 </a>
                 <a href="#" class="menu-item" data-section="assignments">
-                    <span class="icon">📝</span>
+                    <span class="icon"><i class="fas fa-tasks"></i></span>
                     <span>Assignments</span>
                 </a>
                 <a href="#" class="menu-item" data-section="quiz">
-                    <span class="icon">❓</span>
+                    <span class="icon"><i class="fas fa-graduation-cap"></i></span>
                     <span>MCQ Quiz</span>
                 </a>
                 <a href="#" class="menu-item" data-section="tests">
-                    <span class="icon">📋</span>
+                    <span class="icon"><i class="fas fa-chalkboard-teacher"></i></span>
                     <span>Tests</span>
                 </a>
                 <a href="#" class="menu-item" data-section="syllabus">
-                    <span class="icon">📚</span>
+                    <span class="icon"><i class="fas fa-book-open"></i></span>
                     <span>Syllabus</span>
                 </a>
                 <a href="#" class="menu-item" data-section="attendance">
-                    <span class="icon">✅</span>
+                    <span class="icon"><i class="fas fa-user-check"></i></span>
                     <span>Attendance</span>
                 </a>
                 <a href="#" class="menu-item" data-section="resources">
-                    <span class="icon">🔗</span>
+                    <span class="icon"><i class="fas fa-folder-open"></i></span>
                     <span>Resources</span>
                 </a>
                 <a href="#" class="menu-item" data-section="leaderboard-admin">
-                    <span class="icon">🏆</span>
+                    <span class="icon"><i class="fas fa-trophy"></i></span>
                     <span>Leaderboard</span>
                 </a>
                 <a href="#" class="menu-item logout" id="logoutBtn">
-                    <span class="icon">🚪</span>
+                    <span class="icon"><i class="fas fa-sign-out-alt"></i></span>
                     <span>Logout</span>
                 </a>
             </nav>
@@ -72,10 +73,10 @@
         <!-- Main Content -->
         <main class="main-content">
             <header class="top-bar">
-                <button id="menuBtn" class="mobile-only-btn">☰</button>
+                <button id="menuBtn" class="mobile-only-btn"><i class="fas fa-bars"></i></button>
                 <h1 id="pageTitle">Admin Overview</h1>
                 <div class="user-info">
-                    <span>👤 Administrator</span>
+                    <span><i class="fas fa-user-shield"></i> Administrator</span>
                 </div>
             </header>
 
@@ -88,30 +89,30 @@
 
                 <div class="stats-grid">
                     <div class="stat-card">
-                        <div class="stat-icon">👥</div>
+                        <div class="stat-icon"><i class="fas fa-users"></i></div>
                         <div class="stat-info">
                             <h3 id="totalStudents">0</h3>
                             <p>Total Students</p>
                         </div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-icon">📝</div>
+                        <div class="stat-icon"><i class="fas fa-file-alt"></i></div>
                         <div class="stat-info">
-                            <h3 id="totalAssignments">0</h3>
+                            <h3>0</h3>
                             <p>Assignments</p>
                         </div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-icon">❓</div>
+                        <div class="stat-icon"><i class="fas fa-question-circle"></i></div>
                         <div class="stat-info">
-                            <h3 id="totalQuizzes">0</h3>
+                            <h3>0</h3>
                             <p>Quizzes</p>
                         </div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-icon">📢</div>
+                        <div class="stat-icon"><i class="fas fa-bullhorn"></i></div>
                         <div class="stat-info">
-                            <h3 id="totalAnnouncements">0</h3>
+                            <h3>0</h3>
                             <p>Announcements</p>
                         </div>
                     </div>
@@ -126,6 +127,24 @@
                         <div class="form-group">
                             <label for="resource-title">Resource Title</label>
                             <input type="text" id="resource-title" placeholder="e.g. Chapter 1 PDF" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="resource-class">Target Class</label>
+                            <select id="resource-class" required>
+                                <option value="All">All Classes</option>
+                                <option value="1">Class 1</option>
+                                <option value="2">Class 2</option>
+                                <option value="3">Class 3</option>
+                                <option value="4">Class 4</option>
+                                <option value="5">Class 5</option>
+                                <option value="6">Class 6</option>
+                                <option value="7">Class 7</option>
+                                <option value="8">Class 8</option>
+                                <option value="9">Class 9</option>
+                                <option value="10">Class 10</option>
+                                <option value="11">Class 11</option>
+                                <option value="12">Class 12</option>
+                            </select>
                         </div>
                         <div class="form-group">
                             <label for="resource-type">Category</label>
@@ -204,10 +223,23 @@
 
             <!-- Students Section -->
             <section id="students" class="content-section">
-                <h2>Registered Students</h2>
-                <div class="students-list" id="studentsList">
-                    <h3>All Students</h3>
-                    <!-- Student list will be populated here -->
+                <h2>Manage Students</h2>
+                <div class="table-container"
+                    style="background: var(--glass-bg); border-radius: 16px; border: 1px solid var(--glass-border);">
+                    <table class="results-table">
+                        <thead>
+                            <tr>
+                                <th style="padding: 1rem;">Name</th>
+                                <th style="padding: 1rem;">Class</th>
+                                <th style="padding: 1rem;">Roll No</th>
+                                <th style="padding: 1rem;">Email</th>
+                                <th style="padding: 1rem;">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="studentsTableBody">
+                            <!-- Student list will be populated here -->
+                        </tbody>
+                    </table>
                 </div>
             </section>
 
@@ -219,6 +251,24 @@
                         <div class="form-group">
                             <label for="announcement-title">Announcement Title</label>
                             <input type="text" id="announcement-title" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="announcement-class">Target Class</label>
+                            <select id="announcement-class" required>
+                                <option value="All">All Classes</option>
+                                <option value="1">Class 1</option>
+                                <option value="2">Class 2</option>
+                                <option value="3">Class 3</option>
+                                <option value="4">Class 4</option>
+                                <option value="5">Class 5</option>
+                                <option value="6">Class 6</option>
+                                <option value="7">Class 7</option>
+                                <option value="8">Class 8</option>
+                                <option value="9">Class 9</option>
+                                <option value="10">Class 10</option>
+                                <option value="11">Class 11</option>
+                                <option value="12">Class 12</option>
+                            </select>
                         </div>
                         <div class="form-group">
                             <label for="announcement-message">Message</label>
@@ -240,6 +290,24 @@
                         <div class="form-group">
                             <label for="assignment-title">Assignment Title</label>
                             <input type="text" id="assignment-title" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="assignment-class">Target Class</label>
+                            <select id="assignment-class" required>
+                                <option value="All">All Classes</option>
+                                <option value="1">Class 1</option>
+                                <option value="2">Class 2</option>
+                                <option value="3">Class 3</option>
+                                <option value="4">Class 4</option>
+                                <option value="5">Class 5</option>
+                                <option value="6">Class 6</option>
+                                <option value="7">Class 7</option>
+                                <option value="8">Class 8</option>
+                                <option value="9">Class 9</option>
+                                <option value="10">Class 10</option>
+                                <option value="11">Class 11</option>
+                                <option value="12">Class 12</option>
+                            </select>
                         </div>
                         <div class="form-group">
                             <label for="assignment-subject">Subject</label>
@@ -275,6 +343,24 @@
                         <div class="form-group">
                             <label for="quiz-title">Quiz Title</label>
                             <input type="text" id="quiz-title" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="quiz-class">Target Class</label>
+                            <select id="quiz-class" required>
+                                <option value="All">All Classes</option>
+                                <option value="1">Class 1</option>
+                                <option value="2">Class 2</option>
+                                <option value="3">Class 3</option>
+                                <option value="4">Class 4</option>
+                                <option value="5">Class 5</option>
+                                <option value="6">Class 6</option>
+                                <option value="7">Class 7</option>
+                                <option value="8">Class 8</option>
+                                <option value="9">Class 9</option>
+                                <option value="10">Class 10</option>
+                                <option value="11">Class 11</option>
+                                <option value="12">Class 12</option>
+                            </select>
                         </div>
                         <div class="form-group">
                             <label for="quiz-duration">Duration (minutes)</label>
@@ -324,6 +410,24 @@
                             <input type="text" id="test-title" required>
                         </div>
                         <div class="form-group">
+                            <label for="test-class">Target Class</label>
+                            <select id="test-class" required>
+                                <option value="All">All Classes</option>
+                                <option value="1">Class 1</option>
+                                <option value="2">Class 2</option>
+                                <option value="3">Class 3</option>
+                                <option value="4">Class 4</option>
+                                <option value="5">Class 5</option>
+                                <option value="6">Class 6</option>
+                                <option value="7">Class 7</option>
+                                <option value="8">Class 8</option>
+                                <option value="9">Class 9</option>
+                                <option value="10">Class 10</option>
+                                <option value="11">Class 11</option>
+                                <option value="12">Class 12</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
                             <label for="test-subject">Subject</label>
                             <input type="text" id="test-subject" required>
                         </div>
@@ -371,6 +475,24 @@
                         <div class="form-group">
                             <label for="syllabus-subject">Subject</label>
                             <input type="text" id="syllabus-subject" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="syllabus-class">Target Class</label>
+                            <select id="syllabus-class" required>
+                                <option value="All">All Classes</option>
+                                <option value="1">Class 1</option>
+                                <option value="2">Class 2</option>
+                                <option value="3">Class 3</option>
+                                <option value="4">Class 4</option>
+                                <option value="5">Class 5</option>
+                                <option value="6">Class 6</option>
+                                <option value="7">Class 7</option>
+                                <option value="8">Class 8</option>
+                                <option value="9">Class 9</option>
+                                <option value="10">Class 10</option>
+                                <option value="11">Class 11</option>
+                                <option value="12">Class 12</option>
+                            </select>
                         </div>
                         <div class="form-group">
                             <label for="syllabus-topics">Topics (One per line)</label>
@@ -510,7 +632,7 @@
                         <p style="margin-bottom: 1rem; color: #475569;">Attached File:</p>
                         <a id="downloadFileBtn" href="#" download class="btn-primary"
                             style="text-decoration: none; display: inline-block;">
-                            📥 Download / View File
+                            <i class="fas fa-download"></i> Download / View File
                         </a>
                         <p id="fileNameDisplay" style="margin-top: 0.5rem; font-size: 0.9rem; color: #64748b;"></p>
                     </div>
@@ -528,6 +650,57 @@
                         <button class="btn-primary" onclick="saveAssignmentGrade()">Save Grade</button>
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Student Modal -->
+    <div id="editStudentModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Edit Student Profile</h2>
+                <button class="btn-secondary" id="closeEditStudentModal">Close</button>
+            </div>
+            <div class="modal-body">
+                <form id="editStudentForm">
+                    <input type="hidden" id="editStudentId">
+                    <div class="form-group">
+                        <label for="edit-name">Full Name</label>
+                        <input type="text" id="edit-name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-email">Email</label>
+                        <input type="email" id="edit-email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-class">Class</label>
+                        <select id="edit-class" required>
+                            <option value="1">Class 1</option>
+                            <option value="2">Class 2</option>
+                            <option value="3">Class 3</option>
+                            <option value="4">Class 4</option>
+                            <option value="5">Class 5</option>
+                            <option value="6">Class 6</option>
+                            <option value="7">Class 7</option>
+                            <option value="8">Class 8</option>
+                            <option value="9">Class 9</option>
+                            <option value="10">Class 10</option>
+                            <option value="11">Class 11</option>
+                            <option value="12">Class 12</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-roll">Roll Number</label>
+                        <input type="text" id="edit-roll" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-password">Password</label>
+                        <input type="text" id="edit-password" required placeholder="Enter new password">
+                        <p style="font-size: 0.8rem; color: #ef4444; margin-top: 5px;">Warning: Changing this will
+                            affect student login.</p>
+                    </div>
+                    <button type="submit" class="btn-primary">Save Changes</button>
+                </form>
             </div>
         </div>
     </div>
